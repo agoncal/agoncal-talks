@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:forgeview="http://jboss.org/forge/view"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="id" value='#{reimbursementBean.id}'/>
+        <f:event type="preRenderView" listener='#{reimbursementBean.retrieve}'/>
+    </f:metadata>
+
+    <ui:param name="pageTitle" value="View Reimbursement"/>
+
+    <ui:define name="header">
+        Reimbursement
+    </ui:define>
+
+    <ui:define name="subheader">
+        View existing Reimbursement
+    </ui:define>
+
+    <ui:define name="footer"/>
+
+    <ui:define name="main">
+        <h:panelGrid columnClasses="label,component,required" columns="3">
+            <h:outputLabel for="reimbursementBeanReimbursementDate" value="Date:"/>
+            <h:outputText id="reimbursementBeanReimbursementDate" value="#{reimbursementBean.reimbursement.date}">
+                <f:convertDateTime type="date"/>
+            </h:outputText>
+            <h:outputText/>
+            <h:outputLabel for="reimbursementBeanReimbursementExpenses" value="Expenses:"/>
+            <h:dataTable id="reimbursementBeanReimbursementExpenses" styleClass="data-table"
+                         value="#{forgeview:asList(reimbursementBean.reimbursement.expenses)}" var="_item">
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Description"/>
+                    </f:facet>
+                    <h:link outcome="/admin/expense/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemDescription" value="#{_item.description}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Date"/>
+                    </f:facet>
+                    <h:link outcome="/admin/expense/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemDate" value="#{_item.date}">
+                            <f:convertDateTime type="date"/>
+                        </h:outputText>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Amount"/>
+                    </f:facet>
+                    <h:link outcome="/admin/expense/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemAmount" value="#{_item.amount}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Expense Type"/>
+                    </f:facet>
+                    <h:link outcome="/admin/expense/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemExpenseType" value="#{_item.expenseType}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Currency"/>
+                    </f:facet>
+                    <h:link outcome="/admin/expense/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemCurrency" value="#{_item.currency}"/>
+                    </h:link>
+                </h:column>
+            </h:dataTable>
+            <h:outputText/>
+            <h:outputLabel for="reimbursementBeanReimbursementCurrency" value="Currency:"/>
+            <h:outputText id="reimbursementBeanReimbursementCurrency"
+                          value="#{reimbursementBean.reimbursement.currency}"/>
+            <h:outputText/>
+            <h:outputLabel for="reimbursementBeanReimbursementUser" value="User:"/>
+            <h:link id="reimbursementBeanReimbursementUser" outcome="/admin/user/view"
+                    rendered="#{!empty reimbursementBean.reimbursement.user}"
+                    value="#{reimbursementBean.reimbursement.user}">
+                <f:param name="id" value="#{reimbursementBean.reimbursement.user.id}"/>
+            </h:link>
+            <h:outputText/>
+            <h:outputLabel for="reimbursementBeanReimbursementConference" value="Conference:"/>
+            <h:link id="reimbursementBeanReimbursementConference" outcome="/admin/conference/view"
+                    rendered="#{!empty reimbursementBean.reimbursement.conference}"
+                    value="#{reimbursementBean.reimbursement.conference}">
+                <f:param name="id" value="#{reimbursementBean.reimbursement.conference.id}"/>
+            </h:link>
+            <h:outputText/>
+        </h:panelGrid>
+
+        <div class="buttons">
+            <h:link value="View All" outcome="search" styleClass="btn btn-primary"/>
+            <h:link value="Edit" outcome="create" includeViewParams="true" styleClass="btn btn-primary"/>
+            <h:link value="Create New" outcome="create" styleClass="btn btn-primary"/>
+        </div>
+    </ui:define>
+
+</ui:composition>

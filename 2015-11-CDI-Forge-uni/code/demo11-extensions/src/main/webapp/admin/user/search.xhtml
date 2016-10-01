@@ -1,0 +1,86 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="page" value='#{userBean.page}'/>
+        <f:event type="preRenderView" listener='#{userBean.paginate}'/>
+    </f:metadata>
+
+    <ui:param name="pageTitle" value="Search User entities"/>
+
+    <ui:define name="header">
+        User
+    </ui:define>
+
+    <ui:define name="subheader">
+        Search User entities
+    </ui:define>
+
+    <ui:define name="footer"/>
+
+    <ui:define name="main">
+        <h:form id="search">
+            <f:validateBean disabled="true">
+                <h:panelGroup styleClass="search">
+
+                    <h:panelGrid columnClasses="label,component,required" columns="3">
+                        <h:outputLabel for="userBeanExampleLogin" value="Login:"/>
+                        <h:panelGroup>
+                            <h:inputText id="userBeanExampleLogin" value="#{userBean.example.login}"/>
+                            <h:message for="userBeanExampleLogin" styleClass="error"/>
+                        </h:panelGroup>
+                        <h:outputText/>
+                        <h:outputLabel for="userBeanExampleName" value="Name:"/>
+                        <h:panelGroup>
+                            <h:inputText id="userBeanExampleName" value="#{userBean.example.name}"/>
+                            <h:message for="userBeanExampleName" styleClass="error"/>
+                        </h:panelGroup>
+                        <h:outputText/>
+                    </h:panelGrid>
+                    <h:panelGroup styleClass="buttons">
+                        <h:commandLink value="Search" action='#{userBean.search}' styleClass="btn btn-primary"/>
+                        <h:commandLink value="Create New" action='#{userBean.create}' styleClass="btn btn-primary"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </f:validateBean>
+
+            <h:dataTable id="userBeanPageItems" styleClass="data-table" value="#{userBean.pageItems}" var="_item">
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Login"/>
+                    </f:facet>
+                    <h:link outcome="/admin/user/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemLogin" value="#{_item.login}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Name"/>
+                    </f:facet>
+                    <h:link outcome="/admin/user/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemName" value="#{_item.name}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Role"/>
+                    </f:facet>
+                    <h:link outcome="/admin/user/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemRole" value="#{_item.role}"/>
+                    </h:link>
+                </h:column>
+            </h:dataTable>
+            <ui:include src="/resources/scaffold/paginator.xhtml">
+                <ui:param name="paginatorBean" value='#{userBean}'/>
+            </ui:include>
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>

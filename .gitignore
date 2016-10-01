@@ -1,6 +1,9 @@
 ## Mac
 .DS_Store
 
+## Ruby
+*.lock
+
 ## Asciidoctor
 slides/*.html
 
@@ -12,7 +15,7 @@ rebel.xml
 target/
 logs/
 .idea/
-*/.idea/
+*/	.idea/
 *.iml
 *.svg
 *.svg.cache

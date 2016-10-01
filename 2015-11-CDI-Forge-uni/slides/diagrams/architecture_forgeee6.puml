@@ -1,0 +1,14 @@
+@startuml
+
+
+html.ConferenceCRUD ..> web.ConferenceBean : use
+html.ExpenseCRUD ..> web.ExpenseBean : use
+html.ReimbursementCRUD ..> web.ReimbursementBean : use
+html.UserCRUD ..> web.UserBean : use
+rest.ConferenceEndpoint ..> model.Conference : use
+web.ConferenceBean ..> model.Conference : use
+web.ExpenseBean ..> model.ExpenseService : use
+web.ReimbursementBean ..> model.Reimbursement : use
+web.UserBean ..> model.User : use
+
+@enduml

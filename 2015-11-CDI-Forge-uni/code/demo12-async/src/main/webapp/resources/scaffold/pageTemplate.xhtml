@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<h:head>
+    <title>#{empty pageTitle ? 'Page Title' : pageTitle}</title>
+    <link rel="icon" href='#{resource["favicon.ico"]}'/>
+    <h:outputScript library="primefaces" name="jquery/jquery.js"/>
+    <h:outputStylesheet library="webjars" name="bootstrap/2.3.2/css/bootstrap.min.css"/>
+    <h:outputStylesheet name="forge-style.css"/>
+</h:head>
+
+<h:body>
+    <ui:debug rendered="#{facesContext.application.projectStage == 'Development'}"/>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <h:link id="brandLink" outcome="/index.xhtml" styleClass="brand">
+                    <h:outputText value="Welcome to " rendered=" #{request.userPrincipal !=null} "/>
+                    ExpensEEs
+                    <h:outputText value=",  #{request.userPrincipal.name}" rendered="#{request.userPrincipal !=null} "/>
+                </h:link>
+            </div>
+            <div id="navbar">
+                <h:form>
+                    <h:panelGroup layout="block" class="form-group" rendered="#{!accountBean.loggedIn}">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="dropdown active">
+                                <h:link outcome="/account/signin.xhtml" value="Connexion"/>
+                            </li>
+                        </ul>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" class="form-group" rendered="#{accountBean.loggedIn}">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                                   aria-haspopup="true" aria-expanded="false">#{accountBean.user.name} <span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><h:link outcome="/account/profile" value="Profile"/></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><h:commandLink action="#{accountBean.doLogout}" value="Logout"/></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </h:panelGroup>
+                </h:form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container forgecontainer">
+        <div id="navigation">
+            <h:link id="homeLink" outcome="/index.xhtml">
+                <img src='#{resource["forge-logo.png"]}' alt="Forge... get hammered" border="0"/>
+            </h:link>
+            <ul>
+                <li>
+                    <h:link outcome="/expense/add" value="New expense"
+                            rendered="#{accountBean.loggedIn and !accountBean.admin}"/>
+                </li>
+                <li>
+                    <h:link outcome="/expense/view" value="View expenses"
+                            rendered="#{accountBean.loggedIn and !accountBean.admin}"/>
+                </li>
+                <li>
+                    <h:link outcome="/admin/conference/search" value="Conference" rendered="#{accountBean.admin}"/>
+                </li>
+                <li>
+                    <h:link outcome="/admin/expense/search" value="Expense" rendered="#{accountBean.admin}"/>
+                </li>
+                <li>
+                    <h:link outcome="/admin/reimbursement/search" value="Reimbursement"
+                            rendered="#{accountBean.admin}"/>
+                </li>
+                <li>
+                    <h:link outcome="/admin/user/search" value="User" rendered="#{accountBean.admin}"/>
+                </li>
+            </ul>
+        </div>
+
+        <div id="content">
+            <h1>
+                <ui:insert name="header"/>
+            </h1>
+
+            <h2>
+                <ui:insert name="subheader"/>
+            </h2>
+
+            <ui:insert name="main"/>
+        </div>
+    </div>
+
+    <footer>
+        <div id="footer-wrapper">
+            <p>Powered by <a href="http://jboss.org/forge">Forge</a></p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <h:outputScript library="webjars" name="bootstrap/2.3.2/js/bootstrap.min.js"/>
+
+</h:body>
+</html>

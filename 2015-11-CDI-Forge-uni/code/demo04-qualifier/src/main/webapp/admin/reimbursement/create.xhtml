@@ -1,0 +1,173 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:forgeview="http://jboss.org/forge/view"
+                xmlns:p="http://primefaces.org/ui"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="id" value='#{reimbursementBean.id}'/>
+        <f:event type="preRenderView" listener='#{reimbursementBean.retrieve}'/>
+    </f:metadata>
+
+    <ui:param name="pageTitle" value="Create Reimbursement"/>
+
+    <ui:define name="header">
+        Reimbursement
+    </ui:define>
+
+    <ui:define name="subheader">
+        <c:choose>
+            <c:when test='#{!empty reimbursementBean.id}'>
+                Edit existing Reimbursement
+            </c:when>
+            <c:otherwise>
+                Create a new Reimbursement
+            </c:otherwise>
+        </c:choose>
+    </ui:define>
+
+    <ui:define name="footer"/>
+
+    <ui:define name="main">
+        <h:form id="create">
+            <h:messages globalOnly="true" styleClass="error"/>
+
+            <h:panelGrid columnClasses="label,component,required" columns="3">
+                <h:outputLabel for="reimbursementBeanReimbursementDate" value="Date:"/>
+                <h:panelGroup>
+                    <p:calendar id="reimbursementBeanReimbursementDate" display="inline" navigator="true"
+                                pattern="d/M/yyyy"
+                                value="#{reimbursementBean.reimbursement.date}"/>
+                    <h:message for="reimbursementBeanReimbursementDate" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+                <h:outputLabel for="reimbursementBeanReimbursementExpenses" value="Expenses:"/>
+                <h:panelGroup>
+                    <ui:param name="_collection" value="#{reimbursementBean.reimbursement.expenses}"/>
+                    <h:dataTable id="reimbursementBeanReimbursementExpenses" styleClass="data-table"
+                                 value="#{forgeview:asList(_collection)}" var="_item">
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Description"/>
+                            </f:facet>
+                            <h:link outcome="/admin/expense/view">
+                                <f:param name="id" value="#{_item.id}"/>
+                                <h:outputText id="itemDescription" value="#{_item.description}"/>
+                            </h:link>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Date"/>
+                            </f:facet>
+                            <h:link outcome="/admin/expense/view">
+                                <f:param name="id" value="#{_item.id}"/>
+                                <h:outputText id="itemDate" value="#{_item.date}">
+                                    <f:convertDateTime type="date"/>
+                                </h:outputText>
+                            </h:link>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Amount"/>
+                            </f:facet>
+                            <h:link outcome="/admin/expense/view">
+                                <f:param name="id" value="#{_item.id}"/>
+                                <h:outputText id="itemAmount" value="#{_item.amount}"/>
+                            </h:link>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Expense Type"/>
+                            </f:facet>
+                            <h:link outcome="/admin/expense/view">
+                                <f:param name="id" value="#{_item.id}"/>
+                                <h:outputText id="itemExpenseType" value="#{_item.expenseType}"/>
+                            </h:link>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Currency"/>
+                            </f:facet>
+                            <h:link outcome="/admin/expense/view">
+                                <f:param name="id" value="#{_item.id}"/>
+                                <h:outputText id="itemCurrency" value="#{_item.currency}"/>
+                            </h:link>
+                        </h:column>
+                        <h:column footerClass="remove-column" headerClass="remove-column">
+                            <h:commandLink action="#{_collection.remove(_item)}" styleClass="remove-button"/>
+                        </h:column>
+                    </h:dataTable>
+                    <h:panelGrid columnClasses=",remove-column" columns="2" styleClass="data-table-footer">
+                        <h:selectOneMenu converter="#{expenseBean.converter}"
+                                         id="reimbursementBeanReimbursementExpensesSelect"
+                                         value="#{requestScope['reimbursementBeanReimbursementExpensesSelect']}">
+                            <f:selectItem/>
+                            <f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}"
+                                           value="#{expenseBean.all}" var="_item"/>
+                        </h:selectOneMenu>
+                        <h:commandLink
+                                action="#{_collection.add(requestScope['reimbursementBeanReimbursementExpensesSelect'])}"
+                                id="reimbursementBeanReimbursementExpensesAdd"
+                                onclick="if (document.getElementById(document.forms[0].id+':reimbursementBeanReimbursementExpensesSelect').selectedIndex &lt; 1) { alert('Must select a Expense'); return false; }"
+                                styleClass="add-button"/>
+                    </h:panelGrid>
+                </h:panelGroup>
+                <h:outputText/>
+                <h:outputLabel for="reimbursementBeanReimbursementCurrency" value="Currency:"/>
+                <h:panelGroup>
+                    <h:selectOneMenu id="reimbursementBeanReimbursementCurrency"
+                                     value="#{reimbursementBean.reimbursement.currency}">
+                        <f:selectItem/>
+                        <f:selectItem itemValue="USD"/>
+                        <f:selectItem itemValue="EURO"/>
+                    </h:selectOneMenu>
+                    <h:message for="reimbursementBeanReimbursementCurrency" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+                <h:outputLabel for="reimbursementBeanReimbursementUser" value="User:"/>
+                <h:panelGroup>
+                    <h:selectOneMenu converter="#{userBean.converter}" id="reimbursementBeanReimbursementUser"
+                                     value="#{reimbursementBean.reimbursement.user}">
+                        <f:selectItem/>
+                        <f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}"
+                                       value="#{userBean.all}" var="_item"/>
+                    </h:selectOneMenu>
+                    <h:message for="reimbursementBeanReimbursementUser" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+                <h:outputLabel for="reimbursementBeanReimbursementConference" value="Conference:"/>
+                <h:panelGroup>
+                    <h:selectOneMenu converter="#{conferenceBean.converter}"
+                                     id="reimbursementBeanReimbursementConference"
+                                     value="#{reimbursementBean.reimbursement.conference}">
+                        <f:selectItem/>
+                        <f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}"
+                                       value="#{conferenceBean.all}" var="_item"/>
+                    </h:selectOneMenu>
+                    <h:message for="reimbursementBeanReimbursementConference" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+            </h:panelGrid>
+
+            <div class="buttons">
+                <h:commandLink value="Save" action='#{reimbursementBean.update}' styleClass="btn btn-primary"/>
+                <c:choose>
+                    <c:when test='#{!empty reimbursementBean.id}'>
+                        <h:link value="Cancel" outcome="view" styleClass="btn btn-primary">
+                            <f:param name="id" value='#{reimbursementBean.id}'/>
+                        </h:link>
+                        <h:commandLink value="Delete" action='#{reimbursementBean.delete}'
+                                       styleClass="btn btn-primary"/>
+                    </c:when>
+                    <c:otherwise>
+                        <h:link value="Cancel" outcome="search" styleClass="btn btn-primary"/>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </h:form>
+    </ui:define>
+
+</ui:composition>

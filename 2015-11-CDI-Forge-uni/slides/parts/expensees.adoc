@@ -1,0 +1,147 @@
+[.intro]
+== Meet ExpensEEs
+
+Expenses made EEsy
+
+[.topic]
+== We were asked to build this app
+
+[.smallest]
+====
+* icon:money[] A web app to manage expenses
+* icon:wrench[] Based on Java EE 7
+** icon:check[] CDI 1.2
+** icon:check[] JPA 2.1
+** icon:check[] JSF 2.2
+** icon:check[] JAX-RS 2.0
+* icon:book[] Able to integrate legacy libs
+====
+
+[.topic]
+== Storyboard - _Home Screen_
+
+image:Balsamiq1-Welcome.png[width="90%", align="center", float="right"]
+
+[.topic]
+== Storyboard - _Login Screen_
+
+image:Balsamiq2-Login.png[width="90%", align="center", float="right"]
+
+[.topic]
+== Storyboard - _New User Screen_
+
+image:Balsamiq3-NewUser.png[width="90%", align="center", float="right"]
+
+[.topic]
+== Storyboard - _Logged In_
+
+image:Balsamiq4-LoggedIn.png[width="90%", align="center", float="right"]
+
+[.topic]
+== Storyboard - _Profile_
+
+image:Balsamiq5-Profile.png[width="90%", align="center", float="right"]
+
+[.topic]
+== Storyboard - _Expense Detail_
+
+image:Balsamiq6-ExpenseDetail.png[width="90%", align="center", float="right"]
+
+[.topic]
+== Storyboard - _Expense Confirm_
+
+image:Balsamiq7-ExpenseConfirm.png[width="90%", align="center", float="right"]
+
+[.topic]
+== Storyboard - _View Expenses_
+
+image:Balsamiq8-ViewExpenses.png[width="90%", align="center", float="right"]
+
+
+[.topic]
+== Architecture - _Model_
+
+plantuml::diagrams/architecture_model.puml[architecture_model, format=svg, width=95%, height=95%]
+
+== !
+
+[.statement]
+Let's Forge ExpensEEs!
+
+
+[.topic.source]
+== JBoss Forge
+
+
+[.statement]
+====
+Forge
+
+image::jbossforge.png[role="pull-right", width="200"]
+
+. Generation & Scaffolding tool
+. Shell commands & IDE Integration
+. Gets you start quickly
+. Takes care of integration
+. Plugin based
+. Java EE... But anything else really
+. More info on http://forge.jboss.org/
+====
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: Run JBoss Forge
+
+TIP: Create JPA Entities
+
+TIP: Scaffold JSF CRUD pages
+
+TIP: Scaffold REST Endpoint
+
+TIP: Run Forge script
+====
+
+[.topic]
+== Architecture Forge
+
+plantuml::diagrams/architecture_forgeee6.puml[format=svg, width=95%, height=95%]
+
+
+[.topic]
+== Not Finished Yet
+
+[.statement]
+====
+. Only a CRUD app
+. No "Create expenses" Wizard
+. No Login/logout
+. Primefaces
+. Java EE 6 instead of Java EE 7
+. JTA 1.2 @Transactional
+. JPA 2.1 Insert data in DB
+. Not in full CDI programming model !
+====
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: Refactor the app
+
+TIP: Add a service layer
+
+TIP: Add Java EE 7 dependencies
+
+TIP: Less EJB More CDI
+
+TIP: Webjar for Twitter Bootstrap
+
+TIP: 2 hours later...
+====
+
+[.topic]
+== New Architecture
+
+plantuml::diagrams/architecture_forgeee7.puml[format=svg, width=95%, height=95%]

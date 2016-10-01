@@ -1,0 +1,99 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:forgeview="http://jboss.org/forge/view" xmlns:p="http://primefaces.org/ui"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <ui:param name="pageTitle" value="Add Expense"/>
+
+    <ui:define name="header">
+        Add expense
+    </ui:define>
+
+    <ui:define name="subheader">
+        Add a new expense
+    </ui:define>
+
+    <ui:define name="main">
+        <h:form id="create">
+            <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+            <h:panelGrid columnClasses="label,component,required" columns="3">
+                <h:outputLabel for="reimbursementBeanReimbursementConference" value="Conference:"/>
+                <h:panelGroup>
+                    <h:selectOneMenu converter="#{conferenceBean.converter}"
+                                     id="reimbursementBeanReimbursementConference"
+                                     value="#{expenseesBean.conference}"
+                                     rendered="#{expenseesBean.conference == null}">
+                        <f:selectItem/>
+                        <f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}"
+                                       value="#{conferenceBean.all}" var="_item"/>
+                    </h:selectOneMenu>
+                    <h:outputText for="reimbursementBeanReimbursementConference"
+                                  value="#{expenseesBean.conference.name}"
+                                  rendered="#{expenseesBean.conference != null}"/>
+                    <h:message for="reimbursementBeanReimbursementConference" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+
+                <h:outputLabel for="expenseBeanExpenseCurrency" value="Currency:"/>
+                <h:panelGroup>
+                    <h:selectOneMenu id="expenseBeanExpenseCurrency" value="#{expenseesBean.currency}"
+                                     rendered="#{expenseesBean.currency == null}">
+                        <f:selectItem/>
+                        <f:selectItem itemValue="USD"/>
+                        <f:selectItem itemValue="EURO"/>
+                    </h:selectOneMenu>
+                    <h:outputText for="expenseBeanExpenseCurrency"
+                                  value="#{expenseesBean.currency}"
+                                  rendered="#{expenseesBean.currency != null}"/>
+                    <h:message for="expenseBeanExpenseCurrency" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+
+                <h:outputLabel for="expenseBeanExpenseDate" value="Date:"/>
+                <h:panelGroup>
+                    <p:calendar id="expenseBeanExpenseDate" display="inline" navigator="true" pattern="d/M/yyyy"
+                                value="#{expenseesBean.expense.date}"/>
+                    <h:message for="expenseBeanExpenseDate" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+
+                <h:outputLabel for="expenseBeanExpenseExpenseType" value="Expense Type:"/>
+                <h:panelGroup>
+                    <h:selectOneMenu id="expenseBeanExpenseExpenseType" value="#{expenseesBean.expense.expenseType}">
+                        <f:selectItem/>
+                        <f:selectItem itemValue="HOTEL"/>
+                        <f:selectItem itemValue="RESTAURANT"/>
+                        <f:selectItem itemValue="TRAIN"/>
+                        <f:selectItem itemValue="FLIGHT"/>
+                    </h:selectOneMenu>
+                    <h:message for="expenseBeanExpenseExpenseType" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+
+                <h:outputLabel for="expenseBeanExpenseAmount" value="Amount:"/>
+                <h:panelGroup>
+                    <h:inputText id="expenseBeanExpenseAmount" value="#{expenseesBean.expense.amount}"/>
+                    <h:message for="expenseBeanExpenseAmount" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+
+                <h:outputLabel for="expenseBeanExpenseDescription" value="Description:"/>
+                <h:panelGroup>
+                    <h:inputText id="expenseBeanExpenseDescription" value="#{expenseesBean.expense.description}"/>
+                    <h:message for="expenseBeanExpenseDescription" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+
+            </h:panelGrid>
+
+            <div class="buttons">
+                <h:commandLink value="Add Expense" action="#{expenseesBean.addExpense}" styleClass="btn btn-primary"/>
+                <h:commandLink value="Recap" action="#{expenseesBean.recap}" styleClass="btn btn-primary"/>
+            </div>
+        </h:form>
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,77 @@
+@startuml
+
+skinparam shadowing false
+skinparam defaultFontName Consolas
+
+interface BeforeBeanDiscovery {
+    +addQualifier(Class<? extends Annotation>)
+    +addScope(Class<? extends Annotation>, boolean, boolean)
+    +addStereotype(Class<? extends Annotation>, Annotation[])
+    +addInterceptorBinding(Class<? extends Annotation>, Annotation[])
+    +addAnnotatedType(AnnotatedType<?>)
+}
+
+interface AfterTypeDiscovery {
+    +List<Class<?>> getAlternatives()
+    +List<Class<?>> getInterceptors()
+    +List<Class<?>> getDecorators()
+    +addAnnotatedType(AnnotatedType<?>, String)
+}
+
+
+interface AfterDeploymentValidation {
+}
+
+interface BeforeShutdown {
+}
+
+interface AfterBeanDiscovery {
+    +addBean(Bean<?>)
+    +addObserverMethod(ObserverMethod<?>)
+    +addContext(Context)
+    +AnnotatedType<T> getAnnotatedType(Class<T>, String)
+    +Iterable<AnnotatedType<T>> getAnnotatedTypes(Class<T>)
+}
+
+interface ProcessAnnotatedType<X> {
+    +AnnotatedType<X> getAnnotatedType()
+    +void setAnnotatedType(AnnotatedType<X>)
+    +veto()
+}
+
+interface ProcessBean<X> {
+    +Annotated getAnnotated()
+    +Bean<X> getBean()
+}
+
+interface ProcessBeanAttributes<T> {
+    +Annotated getAnnotated()
+    +BeanAttributes<T> getBeanAttributes()
+    +setBeanAttributes(BeanAttributes<T>)
+    +veto()
+}
+
+interface ProcessInjectionPoint<T, X> {
+    +InjectionPoint getInjectionPoint()
+    +setInjectionPoint(InjectionPoint)
+}
+
+interface ProcessInjectionTarget<X> {
+    +AnnotatedType<X> getAnnotatedType()
+    +InjectionTarget<X> getInjectionTarget()
+    +setInjectionTarget(InjectionTarget<X>)
+}
+
+interface ProcessObserverMethod<T, X> {
+    +AnnotatedMethod<X> getAnnotatedMethod()
+    +ObserverMethod<T> getObserverMethod()
+}
+
+
+interface ProcessProducer<T, X> {
+    +AnnotatedMember<T> getAnnotatedMember()
+    +Producer<X> getProducer()
+    +setProducer(Producer<X>)
+}
+
+@enduml

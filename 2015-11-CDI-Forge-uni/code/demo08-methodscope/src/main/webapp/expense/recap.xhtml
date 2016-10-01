@@ -1,0 +1,84 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <ui:param name="pageTitle" value="Recap"/>
+
+    <ui:define name="header">
+        Recap expenses
+    </ui:define>
+
+    <ui:define name="subheader">
+        Confirm your expenses for #{expenseesBean.conference.name}
+    </ui:define>
+
+    <ui:define name="main">
+        <h:form>
+            <h:dataTable id="expenseBeanPageItems" styleClass="data-table"
+                         value="#{expenseesBean.reimbursement.expenses}" var="_item">
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Description"/>
+                    </f:facet>
+                    <h:outputText id="itemDescription" value="#{_item.description}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Date"/>
+                    </f:facet>
+                    <h:outputText id="itemDate" value="#{_item.date}">
+                        <f:convertDateTime type="date"/>
+                    </h:outputText>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Amount"/>
+                    </f:facet>
+                    <h:outputText id="itemAmount" value="#{_item.amount}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Expense Type"/>
+                    </f:facet>
+                    <h:outputText id="itemExpenseType" value="#{_item.expenseType}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Currency"/>
+                    </f:facet>
+                    <h:outputText id="itemCurrency" value="#{_item.currency}"/>
+                </h:column>
+            </h:dataTable>
+
+            <h:panelGrid columnClasses="label,component,required" columns="3">
+                <h:outputLabel for="expenseBeanTotal" value="Total:"/>
+                <h:outputText id="expenseBeanTotal" value="#{expenseesBean.reimbursement.totalAmount}"/>
+                <h:outputText/>
+
+                <h:outputLabel for="expenseBeanExpenseCurrency" value="Want to be reimbursed in:"/>
+                <h:panelGroup>
+                    <h:selectOneMenu id="expenseBeanExpenseCurrency" value="#{expenseesBean.currency}">
+                        <f:ajax event="change" render="expenseBeanTotalInCurrency"/>
+                        <f:selectItem/>
+                        <f:selectItem itemValue="USD"/>
+                        <f:selectItem itemValue="EURO"/>
+                    </h:selectOneMenu>
+                    <h:message for="expenseBeanExpenseCurrency" styleClass="error"/>
+                </h:panelGroup>
+                <h:outputText/>
+
+                <h:outputLabel for="expenseBeanTotalInCurrency" value="Total in currency:"/>
+                <h:outputText id="expenseBeanTotalInCurrency" value="#{expenseesBean.totalAmount}"/>
+                <h:outputText/>
+            </h:panelGrid>
+
+            <div class="buttons">
+                <h:commandLink value="Back" action="#{expenseesBean.back}" styleClass="btn btn-primary"/>
+                <h:commandLink value="Confirm" action="#{expenseesBean.confirm}" styleClass="btn btn-primary"/>
+            </div>
+        </h:form>
+    </ui:define>
+
+</ui:composition>

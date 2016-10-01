@@ -1,0 +1,81 @@
+@startuml
+
+skinparam shadowing false
+skinparam defaultFontName Consolas
+
+BeanAttributes <|-- Bean
+Bean <|-- Interceptor
+Bean <|-- Decorator
+Producer <|-- InjectionTarget
+
+
+interface InjectionPoint {
+    +Type getType()
+    +Set<Annotation> getQualifiers()
+    +Bean<?> getBean()
+    +Member getMember()
+    +Annotated getAnnotated()
+    +boolean isDelegate()
+    +boolean isTransient()
+}
+
+
+interface BeanAttributes<T> {
+    +Set<Type> getTypes()
+    +Set<Annotation> getQualifiers()
+    +Class<? extends Annotation> getScope()
+    +String getName()
+    +Set<Class<? extends Annotation>> getStereotypes()
+    +boolean isAlternative()
+}
+
+
+interface Bean<T> {
+    +Class<?> getBeanClass()
+    +Set<InjectionPoint> getInjectionPoints()
+    +boolean isNullable()
+}
+
+
+interface Interceptor<T> {
+    +Set<Annotation> getInterceptorBindings()
+    +boolean intercepts(InterceptionType type)
+    +Object intercept(InterceptionType, T, InvocationContext)
+}
+
+interface Decorator<T> {
+    +Type getDelegateType()
+    +Set<Annotation> getDelegateQualifiers()
+    +Set<Type> getDecoratedTypes()
+}
+
+
+interface Producer<T> {
+    +T produce(CreationalContext<T>)
+    +void dispose(T)
+    +Set<InjectionPoint> getInjectionPoints()
+}
+
+interface InjectionTarget<T> {
+    +void inject(T, CreationalContext<T>)
+    +void postConstruct(T)
+    +void preDestroy(T)
+}
+
+interface ObserverMethod<T> {
+    +Class<?> getBeanClass()
+    +Type getObservedType()
+    +Set<Annotation> getObservedQualifiers()
+    +Reception getReception()
+    +TransactionPhase getTransactionPhase()
+    +void notify(T)
+}
+
+
+interface EventMetadata {
+    +Set<Annotation> getQualifiers()
+    +InjectionPoint getInjectionPoint()
+    +Type getType()
+}
+
+@enduml

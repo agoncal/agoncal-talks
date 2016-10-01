@@ -1,0 +1,19 @@
+@startuml
+
+core.AbstractService <|-- core.ConferenceService
+core.AbstractService <|-- core.ExpenseService
+core.AbstractService <|-- core.ReimbursementService
+core.AbstractService <|-- core.UserService
+
+core.CurrencyService ..> core.RateService : inject
+
+web.AccountBean ..> core.UserService : inject
+web.ConferenceBean ..> core.ConferenceService : inject
+web.ExpenseBean ..> core.ExpenseService : inject
+web.ReimbursementBean ..> core.ReimbursementService : inject
+web.UserBean ..> core.UserService : inject
+web.ExpenseesBean ..> core.ReimbursementService : inject
+web.ExpenseesBean ..> core.UserService : inject
+web.ExpenseesBean ..> core.CurrencyService : inject
+
+@enduml

@@ -1,0 +1,21 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <ui:param name="pageTitle" value="Welcome to ExpensEEs"/>
+
+    <ui:define name="header">
+        Welcome to ExpensEEs
+    </ui:define>
+
+    <ui:define name="main">
+        <h2 class="success">
+            Expenses made EEsy
+        </h2>
+
+        <p>
+            <h:outputText value="Please log in so you can add your expenses" rendered="#{!accountBean.loggedIn}"/>
+        </p>
+    </ui:define>
+
+</ui:composition>

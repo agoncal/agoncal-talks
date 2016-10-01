@@ -1,0 +1,106 @@
+[.intro]
+== Programmatic Lookup
+
+Resolving beans at runtime
+
+[.topic]
+== Meet `Instance` interface
+
+NOTE: `Instance` interface lets perform typesafe resolution at runtime
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean {
+
+    _@Inject_
+    [highlight]*Instance*<HelloService> service; //<1>
+
+    public void displayHello() {
+        display(service.[highlight]*get()*.hello()); //<2>
+    }
+}
+----
+<1> `Instance<T>` injection points are always satisfied and never fail at deployment time
+<2> with `Instance<T>` you control when bean a instance is requested with the `get()` method
+
+
+[.topic]
+== Check bean existence at runtime
+
+TIP: `Instance<T>` contains methods to test bean resolution
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean {
+
+    *@Inject*
+    Instance<HelloService> service;
+
+    public void displayHello() {
+        if (!(service.[highlight]*isUnsatisfied()* || service.[highlight]*isAmbiguous()*)) { //<1>
+            display(service.get().hello());
+        }
+    }
+}
+----
+<1> if tou skip the test `get()` may throw an exception
+
+[.source]
+== Looping on all beans in the `Instance`
+
+TIP: `Instance<T>` is iterable
+
+TIP: It's where we use the `@Any` qualifier present on all beans
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean {
+
+    _@Inject_
+    [highlight]*@Any*
+    Instance<HelloService> services;
+
+    public void displayHello() {
+        for (HelloService service : services) {
+            display(service.hello());
+        }
+    }
+}
+----
+
+[.source]
+== Select a bean by its qualifier
+
+TIP: `AnnotationLiteral` is a helper class to create an annotation instance
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean {
+
+    _@Inject_
+    [highlight]*@Any*
+    Instance<HelloService> services;
+
+    public void displayHello() {
+            display(
+                services.select(new [highlight]*AnnotationLiteral()<French> {}*).get()); //<1>
+        }
+}
+----
+<1> `select()` also accepts a type.
+
+TIP: you can use `TypeLiteral` to create instances of parameterized types
+
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: Loop through all `DigestPassword`
+
+TIP: Thanks to `@Any`
+
+TIP: Use either `@Encrypted` or `@Clear`
+
+
+====

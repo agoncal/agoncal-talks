@@ -1,0 +1,329 @@
+[.intro]
+== Qualifiers
+
+Solving ambiguous cases with
+
+[.source]
+== When an injection point resolves to multiple beans…
+
+[source, subs="verbatim,quotes", role="smallest"]
+----
+public class MyBean {
+    *@Inject*
+    [highlight]*HelloService* service;
+}
+
+public interface [highlight]*HelloService* {
+    public String hello();
+}
+
+public class FrenchHelloService implements [highlight]*HelloService* {
+    public String hello() { 
+        return "Bonjour tout le monde!";
+    }
+}
+
+public class EnglishHelloService implements [highlight]*HelloService* {
+    public String hello() {
+        return "Hello World!";
+    }
+}
+----
+
+CAUTION: deployment fails with an `Ambiguous dependencies` error.
+
+[.topic]
+== The solution is to create Qualifiers…
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@Qualifier*
+@Retention(RUNTIME)
+@Target({FIELD, TYPE, METHOD, PARAMETER})
+public @interface French {
+}
+
+[highlight]*@Qualifier*
+@Retention(RUNTIME)
+@Target({FIELD, TYPE, METHOD, PARAMETER})
+public @interface English {
+}
+----
+
+TIP: Qualifiers are annotations annotated with `@Qualifier`
+
+[.topic]
+== to qualify beans sharing the same type...
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@French*
+public class FrenchHelloService implements HelloService {
+    public String hello() {
+        return "Bonjour tout le monde!";
+    }
+}
+
+[highlight]*@English*
+public class EnglishHelloService implements HelloService {
+    public String hello() {
+        return "Hello World!";
+    }
+}
+----
+
+[.topic]
+== and distinguish them at injection points.
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean {
+    @Inject
+    [highlight]*@French*
+    HelloService serviceFr;
+
+    @Inject
+    [highlight]*@English*
+    HelloService serviceEn;
+    
+}
+----
+
+TIP: Qualifiers are _types_ enhancing injection, yet keeping it _strong typed_
+
+[.topic]
+== Qualifiers can have members
+
+[source, subs="verbatim,quotes"]
+----
+*@Qualifier*
+@Retention(RUNTIME)
+@Target({FIELD, TYPE, METHOD, PARAMETER}) 
+public @interface Language {
+
+    LangChoice value();
+    
+    [highlight]*@Nonbinding* //<1>
+    String description() default "";
+
+    public enum LangChoice { 
+        FRENCH, ENGLISH
+    }
+}
+----
+<1> `@Nonbinding` member's value isn't used in bean resolution mechanism
+
+[.source]
+== Binding members limit the number of annotations to add to your code
+
+[source, subs="verbatim,quotes", role="smaller"]
+----
+[highlight]*@Language(FRENCH)*
+public class FrenchHelloService implements HelloService {
+    public String hello() { 
+        return "Bonjour tout le monde!";
+    }
+}
+
+[highlight]*@Language(ENGLISH)*
+public class EnglishHelloService implements HelloService {
+    public String hello() {
+        return "Hello World!";
+    }
+}
+
+public class MyBean {
+    @Inject
+    [highlight]*@Language(value = FRENCH, description = "ici on parle français")*
+    HelloService serviceFr;
+
+    @Inject
+    [highlight]*@Language(value = ENGLISH, description = "english spoken here")*
+    HelloService serviceEn;
+}
+----
+
+[.topic]
+== Multiple qualifiers
+
+TIP: A bean can have *multiple* qualifiers
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@Language(FRENCH)* [highlight]*@Console* //<1>
+public class FrenchHelloService implements HelloService {
+    public String hello() { 
+        return "Bonjour tout le monde!";
+    }
+}
+
+public class MyBean {
+    *@Inject*
+    [highlight]*@Language(FRENCH)* [highlight]*@Console*
+    HelloService serviceFr;
+}
+----
+<1> `@Console` is a qualifier
+
+[.topic]
+== Multiple qualifiers
+
+TIP: Injection point can have a *non empty* subset of the bean's qualifiers
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@Language(FRENCH)* [highlight]*@Console*
+public class FrenchHelloService implements HelloService {
+    public String hello() { 
+        return "Bonjour tout le monde!";
+    }
+}
+
+public class MyBean {    
+    *@Inject*
+    [highlight]*@Console*
+    HelloService serviceFr;
+}
+----
+
+
+[.topic]
+== Multiple qualifiers
+
+TIP: Injection point *can't have a super set* of bean's qualifier
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@Language(FRENCH)* [highlight]*@Console*
+public class FrenchHelloService implements HelloService {
+    public String hello() { 
+        return "Bonjour tout le monde!";
+    }
+}
+
+public class MyBean { 
+    *@Inject*
+    [highlight]*@Language(FRENCH)* [highlight]*@Console* [highlight]*@Language(CANADIAN)* //<1>
+    HelloService serviceFr;
+}
+----
+<1> Unsatisfied injection point: deployment fails
+
+[.topic]
+== Built-in qualifiers
+
+TIP: `@Named` set bean name for weak typed environment (EL, Javascript)
+
+TIP: `@Default` added to beans without qualifier or having only `@Named`
+
+TIP: `@Any` added to all beans for programmatic lookup and decorators
+
+TIP: `@Intercepted` & `@Decorated` to inject intercepted bean in an interceptor / Decorator
+
+TIP: `@Initialized` to qualify events when a context is started
+
+TIP: `@Destroyed` to qualify events when a context is destroyed
+
+
+[.source]
+== Examples
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean { ... } //<1>
+    
+[highlight]*@Named*
+public class MyBean2 { ... } //<2>
+
+[highlight]*@Named* [highlight]*@Language(FRENCH)* //<3>
+public class MyBean2 {
+    *@Inject* //<4>
+    MyBean2 bean;
+}
+----
+<1> this bean has `@Default` and `@Any` qualifiers
+<2> this bean has `@Default`, `@Named` and `@Any` qualifiers
+<3> this bean has `@Language(FRENCH)`, `@Named` and `@Any` qualifiers
+<4> this injection point has `@Default` qualifier
+
+
+[.topic]
+== Bean Types
+
+TIP: A bean has a set of types depending on its definition
+
+TIP: Bean types set for a managed bean contains the bean class, every superclass and all interfaces it implements directly or indirectly.
+
+TIP: Bean types can be restricted by using `@Typed` annotation (`Object` is always in the set)
+
+
+[.topic]
+== Bean types Example
+
+[source, subs="verbatim,quotes", role="smaller"]
+----
+public interface HelloService extends Hello { ... }
+
+public class MyBean { //<1>
+    *@Produces*
+    public HelloService prodHelloService() { ... } //<2>
+}
+
+  public class FrHelloService extends GenericService<String> implements HelloService { ... } //<3>
+
+  [highlight]*@Typed({HelloService.class})*
+ public class FrHelloService extends GenericService<String> implements HelloService { ... } //<4>
+----
+<1> class `MyBean` and `Object`
+<2> `HelloService`, `Hello` and `Object`
+<3> `FrHelloService`, `GenericService<String>`, `HelloService`, `Hello` and  `Object`
+<4> `HelloService` and  `Object`
+
+[.topic]
+== Parameterized types count
+
+TIP: Parameterized types information is kept (i.e. no type erasure)
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean {
+
+    *@Inject*
+    [highlight]#Service<User># userService;
+
+    *@Inject*
+    [highlight]#Service<Staff># staffService;    
+}
+----
+
+TIP: Injection points above can be satisfied without ambiguity
+
+[.topic]
+== Performing Typesafe Resolution
+
+TIP: When _resolving a bean_ to be injected to an _injection point_...
+
+TIP: ...the _container_ considers _bean type_ and _qualifiers_.
+
+TIP: If the bean has a _bean type_ that matches _injection point type_...
+
+TIP: ...and the bean has all the _qualifiers_ of the injection point...
+
+TIP: ...the bean is _assignable_ to the _injection point_.
+
+
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: Create a `@Clear` and `@Encrypted` qualifiers
+
+TIP: Create a `DigestPassword` interface
+
+TIP: Two implementations `ClearPassword` and `EncryptPassword`
+
+TIP: Inject encrypted password digest into `AccountBean` and `UserService`
+
+
+====

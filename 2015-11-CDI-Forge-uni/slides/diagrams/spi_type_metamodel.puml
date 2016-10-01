@@ -1,0 +1,63 @@
+@startuml
+
+skinparam shadowing false
+skinparam defaultFontName Consolas
+
+Annotated <|-- AnnotatedMember
+Annotated <|-- AnnotatedParameter
+Annotated <|-- AnnotatedType
+AnnotatedMember <|-- AnnotatedCallable
+AnnotatedMember <|-- AnnotatedField
+AnnotatedCallable <|-- AnnotatedConstructor
+AnnotatedCallable <|-- AnnotatedMethod
+
+interface Annotated {
+    +Type getBaseType()
+    +Set<Type> getTypeClosure()
+    +<T extends Annotation> getAnnotation(Class<T>)
+    +Set<Annotation> getAnnotations()
+    +boolean isAnnotationPresent(Class<? extends Annotation>)
+}
+
+
+interface AnnotatedMember<X> {
+    +Member getJavaMember()
+    +boolean isStatic()
+    +AnnotatedType<X> getDeclaringType()
+}
+
+
+interface AnnotatedParameter<X> {
+    +int getPosition()
+    +AnnotatedCallable<X> getDeclaringCallable()
+}
+
+
+interface AnnotatedType<X> {
+    +Class<X> getJavaClass()
+    +Set<AnnotatedConstructor<X>> getConstructors()
+    +Set<AnnotatedMethod<? super X>> getMethods()
+    +Set<AnnotatedField<? super X>> getFields()
+}
+
+
+interface AnnotatedCallable<X> {
+    +List<AnnotatedParameter<X>> getParameters()
+}
+
+
+interface AnnotatedField<X> {
+    +Field getJavaMember()
+}
+
+
+interface AnnotatedConstructor<X> {
+    +Constructor<X> getJavaMember()
+}
+
+
+interface AnnotatedMethod<X> {
+    +Method getJavaMember()
+}
+
+@enduml

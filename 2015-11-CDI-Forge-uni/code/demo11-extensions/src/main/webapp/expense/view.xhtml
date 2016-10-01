@@ -1,0 +1,58 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:forgeview="http://jboss.org/forge/view"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="page" value='#{reimbursementsBean.page}'/>
+        <f:event type="preRenderView" listener='#{reimbursementsBean.paginate}'/>
+    </f:metadata>
+
+    <ui:param name="pageTitle" value="View Reimbursements"/>
+
+    <ui:define name="header">
+        View reimbursements
+    </ui:define>
+
+    <ui:define name="subheader">
+        View all my reimbursements
+    </ui:define>
+
+    <ui:define name="main">
+        <h:dataTable id="reimbursementBeanPageItems" styleClass="data-table" value="#{reimbursementsBean.pageItems}"
+                     var="_item">
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Conference"/>
+                </f:facet>
+                <h:outputText id="itemConference" value="#{_item.conference.name}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Date"/>
+                </f:facet>
+                <h:outputText id="itemDate" value="#{_item.date}">
+                    <f:convertDateTime type="date"/>
+                </h:outputText>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Total amount"/>
+                </f:facet>
+                <h:outputText id="forgeviewdisplayitemUser" value="#{forgeview:display(_item.totalAmount)}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Currency"/>
+                </f:facet>
+                <h:outputText id="itemCurrency" value="#{_item.currency}"/>
+            </h:column>
+            <ui:include src="/resources/scaffold/paginator.xhtml">
+                <ui:param name="paginatorBean" value='#{reimbursementsBean}'/>
+            </ui:include>
+        </h:dataTable>
+    </ui:define>
+
+</ui:composition>

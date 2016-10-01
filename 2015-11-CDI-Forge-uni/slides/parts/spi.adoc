@@ -1,0 +1,198 @@
+[.topic.intro]
+== Understanding SPI to build CDI extensions
+image:3d-chess.png[width="110%"]
+==!
+
+
+[.topic]
+== SPI can be split in 4 parts
+
+[.statement]
+====
+[.incremental]
+NOTE: Type meta-model
+
+[.incremental]
+NOTE: CDI meta-model
+
+[.incremental]
+NOTE: CDI entry points
+
+[.incremental]
+NOTE: SPI dedicated to extensions
+====
+
+
+[.topic.source]
+== Why having a type meta-model?
+
+[.statement]
+====
+TIP: Because `@Annotations` are configuration
+
+TIP: but they are also read-only
+
+TIP: So to configure we need a mutable meta-model...
+
+TIP: ...for annotated types
+====
+
+
+[.topic.source]
+== SPI for type meta-model
+
+plantuml::diagrams/spi_type_metamodel.puml[format=svg, width=100%, height=95%]
+
+
+[.topic.source]
+== SPI dedicated to CDI meta-model
+
+plantuml::diagrams/spi_cdi_metamodel.puml[format=svg, width=100%]
+
+////
+[.topic.source]
+== This SPI can be used in your code (1/2)
+
+TIP: `InjectionPoint` can be used to get info about what's being injected
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]#@Qualifier#
+@Retention(RetentionPolicy.RUNTIME)
+public @interface [HighLight]#HttpParam# {
+    [highlight]#@Nonbinding# public String value();
+}
+----
+
+[source, subs="verbatim,quotes"]
+----
+@Produces [highlight]#@HttpParam("")#
+[highlight]#String# getParamValue([highlight]#InjectionPoint# ip, [highlight]#HttpServletRequest# req) {
+  return req.getParameter(ip.getAnnotated().getAnnotation(HttpParam.class).value());
+}
+----
+
+[source, subs="verbatim,quotes"]
+----
+@Inject
+[highlight]#@HttpParam("productId")#
+[highlight]#String# productId;
+----
+
+
+[.topic.source]
+== This SPI can be used in your code (2/2)
+
+TIP: `InjectionPoint` contains info about requested type at `@Inject`
+
+[source, subs="verbatim,quotes"]
+----
+class MyMapProducer() {
+
+    [highlight]#@Produces#
+    <K, V> Map<K, V> produceMap([highlight]#InjectionPoint ip#) {
+        if (valueIsNumber(((ParameterizedType) ip.getType())))
+            return new TreeMap<K, V>();
+        return new HashMap<K, V>();
+    }
+
+    boolean valueIsNumber(ParameterizedType type) {
+        Class<?> valueClass = (Class<?>) type.getActualTypeArguments()[1];
+        return Number.class.isAssignableFrom(valueClass)
+    }
+}
+----
+
+
+
+[.topic.source]
+== This SPI can be used in your code (3/4)
+
+TIP: An abstract superclass can use meta to provide generic resolution
+
+[source, subs="verbatim,quotes"]
+----
+public [highlight]#abstract# class AbstractService {
+  //resolver with same qualifiers than the current bean
+  private Resolver resolver;
+
+  [highlight]#@Inject# //@Inject can be used on an initializer method
+  void initResolver([highlight]#Bean#<AbstractService> meta, [highlight]#@Any# [highlight]#Instance#<Resolver> resolvers)
+ {
+    Annotation[] beanQualifiers = (Annotation[]) meta.getQualifiers().toArray()
+    resolver = resolvers.select(beanQualifiers).get()
+  }
+
+public Resolver getResolver() {
+    return resolver
+  }
+}
+----
+
+[.topic.source]
+== This SPI can be used in your code (4/4)
+
+TIP: `EventMetadata` contains type and qualifier info about the event
+
+[source, subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class MyService {
+
+  private void strictListen([highlight]#@Observes# @Qualified Payload evt, [highlight]#EventMetadata# meta) {
+    if(meta.getQualifiers().contains(new QualifiedLiteral())
+       && meta.getType().equals(Payload.class))
+         System.out.println("Do something")
+       else
+         System.out.println("ignore")
+  }
+}
+----
+////
+
+[.topic.source]
+== SPI providing CDI entry points
+
+plantuml::diagrams/spi_entrypoints.puml[format=svg, width=100%, height=95%]
+
+
+[.topic.source]
+== SPI dedicated to extensions
+
+plantuml::diagrams/spi_extensions.puml[format=svg, width=100%, height=100%]
+
+
+[.topic.source]
+== All these SPI interfaces are events containing meta-model SPI
+
+NOTE: These events fired at boot time can only be observed in CDI extensions
+
+NOTE: For instance:
+
+image:processAnnotatedTypeCart.png[width="280",role="pull-left"]
+
+TIP: A `ProcessAnnotatedType<T>` event is fired for each type being discovered at boot time
+
+TIP: Observing `ProcessAnnotatedType<Foo>` allows you to prevent `Foo` to be deployed as a bean by calling `ProcessAnnotatedType#veto()`
+
+
+[.recap]
+== Back to demo
+
+TIP: We got this Javadoc:
+
+image:billing-service.png[width="90%", align="center", float="right"]
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: We don't have the code of the `BillingService`
+
+TIP: Create a `BillingServiceExtension` which calls `BillingService`
+
+TIP: Using observers `BillingServiceObserver`
+
+TIP: Extension has to be enabled
+
+====

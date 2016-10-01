@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="id" value='#{expenseBean.id}'/>
+        <f:event type="preRenderView" listener='#{expenseBean.retrieve}'/>
+    </f:metadata>
+
+    <ui:param name="pageTitle" value="View Expense"/>
+
+    <ui:define name="header">
+        Expense
+    </ui:define>
+
+    <ui:define name="subheader">
+        View existing Expense
+    </ui:define>
+
+    <ui:define name="footer"/>
+
+    <ui:define name="main">
+        <h:panelGrid columnClasses="label,component,required" columns="3">
+            <h:outputLabel for="expenseBeanExpenseDescription" value="Description:"/>
+            <h:outputText id="expenseBeanExpenseDescription" value="#{expenseBean.expense.description}"/>
+            <h:outputText/>
+            <h:outputLabel for="expenseBeanExpenseDate" value="Date:"/>
+            <h:outputText id="expenseBeanExpenseDate" value="#{expenseBean.expense.date}">
+                <f:convertDateTime type="date"/>
+            </h:outputText>
+            <h:outputText/>
+            <h:outputLabel for="expenseBeanExpenseAmount" value="Amount:"/>
+            <h:outputText id="expenseBeanExpenseAmount" value="#{expenseBean.expense.amount}"/>
+            <h:outputText/>
+            <h:outputLabel for="expenseBeanExpenseExpenseType" value="Expense Type:"/>
+            <h:outputText id="expenseBeanExpenseExpenseType" value="#{expenseBean.expense.expenseType}"/>
+            <h:outputText/>
+            <h:outputLabel for="expenseBeanExpenseCurrency" value="Currency:"/>
+            <h:outputText id="expenseBeanExpenseCurrency" value="#{expenseBean.expense.currency}"/>
+            <h:outputText/>
+        </h:panelGrid>
+
+        <div class="buttons">
+            <h:link value="View All" outcome="search" styleClass="btn btn-primary"/>
+            <h:link value="Edit" outcome="create" includeViewParams="true" styleClass="btn btn-primary"/>
+            <h:link value="Create New" outcome="create" styleClass="btn btn-primary"/>
+        </div>
+    </ui:define>
+
+</ui:composition>

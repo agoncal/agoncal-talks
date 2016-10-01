@@ -1,0 +1,41 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <ui:param name="pageTitle" value="Signin"/>
+
+    <ui:define name="header">
+        Signin
+    </ui:define>
+
+    <ui:define name="subheader">
+        Please login
+    </ui:define>
+
+    <ui:define name="main">
+        <h:form>
+            <h:messages globalOnly="true" styleClass="error"/>
+
+            <h:panelGrid columnClasses="label,component,required" columns="2">
+                <label for="inputLogin" class="sr-only">Login</label>
+                <h:inputText id="inputLogin" class="form-control" pt:placeholder="Login"
+                             pt:required="true" pt:autofocus="true" value="#{accountBean.login}"/>
+
+                <label for="inputPassword" class="sr-only">Password</label>
+                <h:inputText id="inputPassword" pt:type="password" class="form-control" pt:placeholder="Password"
+                             pt:required="true" value="#{accountBean.password}"/>
+            </h:panelGrid>
+
+            <div class="buttons">
+                <h:commandButton styleClass="btn btn-primary" value="Sign in"
+                                 action="#{accountBean.doSignin}"/>
+
+                <br/>
+                <h:link styleClass="btn btn-link" value="Sign up for an account" outcome="signup"/>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

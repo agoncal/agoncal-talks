@@ -1,0 +1,123 @@
+[.intro]
+== Alternatives & Stereotypes
+
+[.topic]
+== Alternatives
+
+[.statement]
+====
+TIP: An _alternative_ is a bean that must be explicitly _selected_
+
+TIP: When _selected_ it superseeds beans sharing the same type
+
+TIP: A convenient way to create Mock or specific implementation
+
+TIP: An alternative can be activated in `beans.xml` or with `@Priority`
+====
+
+
+[.source]
+== Alternative Example
+
+[source, subs="verbatim,quotes"]
+----
+public SapService implements ErpService { <1>
+}
+
+@Alternative
+public MockSapService implements ErpService { <2>
+}
+
+@ApplicationScoped
+public OrderService {
+    @Inject
+    ErpService service; <3>
+}
+----
+<1> A service doing heavy or costly operation
+<2> Can be mocked with an alternative
+<3> Beans injecting the service have nothing to do. Alternative will replace the original bean if selected
+
+[.source]
+== Selecting the Alternative
+
+TIP: With `@Priority` annotaion (for the whole app)
+
+[source, subs="verbatim,quotes"]
+----
+*@Alternative*
+[highlight]*@Priority(Interceptor.Priority.APPLICATION)* <1>
+public MockSapService implements ErpService {
+}
+----
+
+TIP: With `beans.xml` file (for the current module)
+
+[source, xml, subs="verbatim,quotes", role="smaller"]
+----
+<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd">
+   <alternatives>
+      <class>com.acme.MockSapService</class>
+   </alternatives>
+</beans>
+----
+
+[.topic]
+== Stereotypes
+
+[.statement]
+====
+TIP: Stereotypes are alias for annotations
+
+TIP: An help to avoid annotations Hell
+
+TIP: An other way to enable alterntives
+====
+
+[.source]
+== Stereotypes
+
+TIP: we have a lot of bean with `@Conversation` and `@Named`
+
+TIP: we can create a stereotype gathering both
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@Stereotype* <1>
+*@Named* <2>
+*@ConversationScoped* <2>
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
+@Documented
+public @interface Wizard {
+}
+----
+<1> We are delcaring a Stereotype
+<2> All the annotations we want to put in the stereotype
+
+[.source]
+== Using Stereotypes
+
+TIP: We can use the stereotype by replacing
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@Named* [highlight]*@ConversationScoped*
+public class ConferenceBean implements Serializable {
+...
+}
+----
+
+TIP: by...
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@Wizard*
+public class ConferenceBean implements Serializable {
+...
+}
+----
+
+

@@ -1,0 +1,73 @@
+[.intro]
+== Meet CDI
+
+Contexts and Dependency Injection
+
+[.topic]
+== What is CDI?
+image::cdi_icon.png[role="pull-right", width="335"]
+[.smallest]
+====
+* icon:file-text[] A Java EE spec.
+* icon:code-fork[] ASL2 (even TCK)
+* icon:rocket[] Launched in Java EE 6
+* icon:history[] 2 releases since launch
+* icon:thumb-tack[] 1.2 is last (Java EE 7)
+* icon:road[] 2.0 on its way
+* icon:wrench[] 2 major impl.
+** icon:check[] JBoss Weld (RI)
+** icon:check[]Apache OpenWebBeans
+====
+
+[NOTE.speaker]
+--
+Java SE is supported by impls and will be at spec level in 2.0
+--
+
+[.topic]
+== What's included?
+
+
+
+CDI Provides:
+
+image::cdi_logo.png[role="pull-right", width="280"]
+
+====
+. A powerful *programming model*
+. Different *Lifecycles* for stateful objects
+. A *Typesafe* DI mechanism
+. The ability to *decorate* injected objects
+. The ability to *intercept* methods
+. An *event* notification model
+. A *SPI* allowing *portable extensions* to integrate 3rd party tech
+====
+
+[.topic]
+== CDI explained to your boss
+
+[quote,role="smallest"]
+____
+*CDI* brings a _powerful_ and _modern_ programming _model_ that standardizes _good practices_.
+
+*CDI* provides a _consistent_ and _seamless_ way to _integrate_ 3rd party frameworks to this _model_.
+
+Once adopted, *CDI* will become the _invisible backbone_ of our projects.
+____
+
+[.topic]
+== One container to rule them all
+
+CAUTION: The container is the heart of CDI
+
+CAUTION: The container checks all possible CDI code at boot time
+
+CAUTION: The container manages your components lifecycle and services
+
+CAUTION: Yet, you'll never see it (except in advanced development)
+
+
+[quote,role="smallest"]
+____
+Container is your application's invisible conductor
+____

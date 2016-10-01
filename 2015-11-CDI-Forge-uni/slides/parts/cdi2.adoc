@@ -1,0 +1,63 @@
+[.intro]
+== CDI 2.0
+
+[.topic]
+== About CDI 2.0
+
+[.statement]
+====
+TIP: Work is in progress on CDI 2.0
+
+TIP: Come see the session _"CDI 2.0 is coming" thursday 2pm room 8_
+
+TIP: One of the new features is the _asynchronous events_
+
+TIP: The good news is: "you can test it today"
+====
+
+
+[.topic]
+== Asynchronous event example
+
+[source, subs="verbatim,quotes", role="smaller"]
+----
+public class FirstBean {
+    @Inject [highlight]#Event<Post># postEvent;
+
+    public void saveNewPost(Post myPost) {
+        postEvent.[highlight]*fireAsync(myPost)*; //<1>
+    }
+}
+
+public class SecondBean {
+    public void listenPost([highlight]*@ObservesAsync* Post post) { //<2>
+        System.out.println("Received : " + evt.message());
+    }
+}
+----
+<1> We introduced a `fireAsync()` method
+<2> For backward compatibility we had to add an `@ObservesAsync` observer
+
+
+[.topic]
+== Let's test asynchronous event
+
+[.statement]
+====
+TIP: Weld 3 Alpha (preview of CDI 2.0 RI) is available
+
+TIP: WildFly includes a patch mechanism to upgrade implementations
+
+TIP: We can patch WildFly with a simple command
+
+[source, console, subs="verbatim,quotes"]
+----
+ ./jboss-cli.sh --command="patch apply ~/wildfly-10.0.0.CR4-weld-3.0.0.Alpha13-patch.zip"
+----
+====
+
+[.recap]
+== Back to demo
+
+[.statement]
+* Let's add asynchronous event

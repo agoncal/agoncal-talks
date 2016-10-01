@@ -1,0 +1,195 @@
+[.intro]
+== Contexts
+
+Beans life and death
+
+[.topic]
+== Bean, Scope and Contexts
+
+TIP: All _Beans_ have a _scope_ defined by an _annotation_
+
+TIP: Each _scope_ is associated to a _context_ object
+
+TIP: So each _bean_ is bound to a _context_
+
+TIP: The context is in charge of _creating_ bean instances
+
+TIP: The _Container_ is in charge of _creating_ and _destroying_ _contexts_
+
+
+[.source]
+== Available scopes
+
+TIP: CDI provides the following _built-in_ scopes (and associated contexts):
+
+[.fartoosmall]
+====
+* icon:recycle[] `@Dependent` (default) bean has the same scope than its injector
+* icon:recycle[] `@ApplicationScoped` instance is linked to application lifecycle
+* icon:recycle[] `@SessionScoped` instance is linked to http session lifecycle
+* icon:recycle[] `@RequestScoped` instance is liked to http request lifecycle
+* icon:recycle[] `@ConversationScoped` lifecycle manually controlled within session
+====
+
+CAUTION: Instance is _created_ at _first request_ and _destroyed_ with its _bound context_
+
+TIP: _CDI SPI_ allows third party to create their _custom contexts_
+
+[.source]
+== Examples
+
+[source, subs="verbatim,quotes"]
+----
+public class BaseHelloService implements HelloService { ... } //<1>
+
+[highlight]*@RequestScoped* //<2>
+public class RequestService {
+    _@Inject_ HelloService service; 
+}
+
+[highlight]*@ApplicationScoped*  //<3>
+public class ApplicationService {
+    _@Inject_ RequestService service; //<4>
+}
+----
+<1> Bean has default scope `@Dependent`, instances are created for each injection
+<2> Bean is `@RequestScoped`. Instance is created by request context and destroyed with request context
+<3> Bean is `@ApplicationScoped`. Instance is created by application context and will live during all application
+<4> No problem to inject bean from an other scope: CDI will provide the right bean
+
+[.source]
+== Good to know
+
+TIP: _instances_ are _created_ when _first accessed_ not with their context
+
+TIP: A bean _instance_ is a _singleton_ in its _context_
+
+TIP: With _SPI_ you can _manually destroy_ an instance in a context
+
+TIP: A context can be _inactive_ without being destroyed
+
+TIP: _Request context_ is _more_ than a mapping to `ServletRequest` lifecycle
+
+[.topic]
+== More on @ConversationScoped
+
+[.smaller]
+====
+CAUTION: A context whose lifecycle is controlled by the dev
+
+CAUTION: Conversation is transient or long running
+
+CAUTION: It's promoted to long running with `Conversation` built-in bean...
+
+CAUTION: ... by calling `begin()` method...
+
+CAUTION: ... and terminated with `end()`.
+
+CAUTION: There can be multiple conversations in one Http Session
+
+CAUTION: Conversation `id` is used to retrieve the active conversation
+====
+
+[.source]
+== Example
+
+[source, subs="verbatim,quotes"]
+----
+@ConversationScoped
+public class WizardBean {
+
+ @Inject
+ Conversation conversation;
+
+ public startWizard() {
+   ...
+   conversation.[highlight]*begin()*
+   ...
+ }
+
+ public endWizard() {
+    ...
+    conversation.[highlight]*end()*
+    ...
+ }
+}
+----
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: Wizard to create new expenses
+
+TIP: Use of `@ConversationScoped`
+
+TIP: JSF deals with `cid`
+
+====
+
+[.topic]
+== Contexts are not always convenient
+
+[.statement]
+====
+CAUTION: Lifecycle _magic_ management can limit you
+
+CAUTION: Bean instances are destroyed only when context ends
+
+CAUTION: And you might want to get rid of instance but keep the context
+
+CAUTION: CDI 1.1 added a programmatic way to destroy an instance
+====
+
+[.source]
+== Example - Logout and session invalidation
+
+[source, subs="verbatim,quotes"]
+----
+@Inject FacesContext facesContext;
+
+public String logout(){
+    try{
+        facesContext.getExternalContext().invalidateSession();
+        return "success?faces-redirect=true"; <1>
+    }
+    catch(Exception e){
+        return "error";
+    }
+}
+----
+<1> redirect is important to end current request and kill the session effectively
+
+TIP: we might want to keep the current session and logout user
+
+TIP: not a good practice to call UI layer from service to perform business
+
+[.source]
+== Example - Do logout in a CDI way
+
+[source, subs="verbatim,quotes"]
+----
+@Named
+@SessionScoped
+public class AccountBean implements Serializable {
+
+    @Inject
+    private Instance<AccountBean> myInstance;
+
+    public String doLogout() {
+        myInstance.*destroy*(myInstance.get()); <1>
+        return "/index";
+    }
+----
+<1> Since CDI 1.1, `Instance` provides a `destroy()` method to remove an instance from its context
+
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: `AccountBean` injects a reference to itself
+
+TIP: `AccountBean` destroys it for logout
+
+====

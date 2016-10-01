@@ -1,0 +1,125 @@
+= Extend Java EE with _CDI_
+Antoine Sabot-Durand; Antonio Goncalves
+:description: CDI Univeristy
+:copyright: CC BY-SA 4.0
+:backend: dzslides
+:sectids!:
+:experimental:
+:toc2:
+:sectanchors:
+:idprefix:
+:idseparator: -
+:icons: font
+:source-highlighter: highlightjs
+:source-language: java
+:language: no-highlight
+:macros-on: subs="macros"
+:caption-off: caption=""
+:title-off: title="", caption=""
+:dzslides-aspect: 16-9
+:imagesdir: images
+:next-label: pass:quotes,attributes[*Next* [icon:caret-right[]]
+:dzslides-style: asciidoctor
+:dzslides-highlight: github
+:dzslides-transition: fade
+:dzslides-fonts: family=Neuton:400,700,800,400italic|Cedarville+Cursive
+:hide-uri-scheme:
+:includegifs:
+:stylesdir: stylesheets
+:stylesheet: custom.css
+
+
+[.topic]
+== Antoine Sabot-Durand
+
+* icon:linux[] Red Hat
+* icon:code[] CDI spec lead
+* icon:twitter[] @antoine_sd
+* icon:rss[] next-presso.com
+* icon:github[] github.com/antoinesd
+
+[.topic]
+== Antonio Goncalves
+
+* icon:star[] Java Champion
+* icon:institution[] Contractor developper
+* icon:rss[] antoniogoncalves.org
+* icon:twitter[] @agoncal
+* icon:github[] github.com/agoncal
+
+
+[.topic.source]
+== Agenda
+
+[.fartoosmall]
+====
+* icon:clock-o[] Meet ExpensEEs
+* icon:clock-o[] Meet CDI
+* icon:clock-o[] Basic DI
+* icon:clock-o[] Producers
+* icon:clock-o[] Interceptors
+* icon:clock-o[] Qualifiers
+* icon:clock-o[] Programmatic Lookup
+* icon:clock-o[] Contexts
+* icon:clock-o[] Events
+* icon:clock-o[] Extensions
+* icon:clock-o[] Conclusion
+====
+
+include::parts/expensees.adoc[]
+
+include::parts/intro.adoc[]
+
+include::parts/inject.adoc[]
+
+include::parts/producers.adoc[]
+
+include::parts/aop.adoc[]
+
+include::parts/qualifiers.adoc[]
+
+include::parts/programmatic-lookup.adoc[]
+
+include::parts/contexts.adoc[]
+
+// Invalidation session
+
+// Creation de scope
+
+include::parts/alternatives_stereotypes.adoc[]
+
+include::parts/events.adoc[]
+
+
+include::parts/extensions.adoc[]
+
+include::parts/spi.adoc[]
+
+include::parts/cdi2.adoc[]
+
+
+
+
+[.topic.intro]
+== Conclusion
+
+
+[.topic.source]
+== References
+
+[.statement]
+====
+NOTE: CDI Specification - http://cdi-spec.org
+
+NOTE: Code & slides repository - https://github.com/antoinesd/cdi-forge-uni
+
+NOTE: Slides generated with _Asciidoctor_, _PlantUML_ and _DZSlides_ backend
+
+NOTE: Original slide template - _Dan Allen_ & _Sarah White_
+====
+
+[.topic.ending, hrole="name"]
+== Antoine Sabot-Durand Antonio Goncalves
+
+[.footer]
+icon:twitter[] @antoine_sd @agoncal

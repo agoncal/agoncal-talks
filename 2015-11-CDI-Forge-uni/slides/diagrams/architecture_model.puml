@@ -1,0 +1,40 @@
+@startuml
+
+User "1" --* "*" Reimbursement
+Reimbursement "1" *-right- "*" Expense
+Conference "1" --* "*" Reimbursement
+
+class Conference {
+   -String name
+   -Date date
+   -String country
+   -String city
+}
+
+
+class Expense {
+   -description
+   -Date date
+   -Float amount
+   -ExpenseType expenseType
+   -private Currency currency
+}
+
+
+class Reimbursement{
+    -Date date
+    -Set<Expense> expenses
+    -Currency currency
+    -User user
+    -Conference conference
+}
+
+class User{
+   -String login
+   -String password
+   -String name
+   -String email
+   -UserRole role
+}
+
+@enduml

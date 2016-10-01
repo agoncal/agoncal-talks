@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:forgeview="http://jboss.org/forge/view"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="page" value='#{reimbursementBean.page}'/>
+        <f:event type="preRenderView" listener='#{reimbursementBean.paginate}'/>
+    </f:metadata>
+
+    <ui:param name="pageTitle" value="Search Reimbursement entities"/>
+
+    <ui:define name="header">
+        Reimbursement
+    </ui:define>
+
+    <ui:define name="subheader">
+        Search Reimbursement entities
+    </ui:define>
+
+    <ui:define name="footer"/>
+
+    <ui:define name="main">
+        <h:form id="search">
+            <f:validateBean disabled="true">
+                <h:panelGroup styleClass="search">
+
+                    <h:panelGrid columnClasses="label,component,required" columns="3">
+                        <h:outputLabel for="reimbursementBeanExampleCurrency" value="Currency:"/>
+                        <h:panelGroup>
+                            <h:selectOneMenu id="reimbursementBeanExampleCurrency"
+                                             value="#{reimbursementBean.example.currency}">
+                                <f:selectItem/>
+                                <f:selectItem itemValue="USD"/>
+                                <f:selectItem itemValue="EURO"/>
+                            </h:selectOneMenu>
+                            <h:message for="reimbursementBeanExampleCurrency" styleClass="error"/>
+                        </h:panelGroup>
+                        <h:outputText/>
+                        <h:outputLabel for="reimbursementBeanExampleUser" value="User:"/>
+                        <h:panelGroup>
+                            <h:selectOneMenu converter="#{userBean.converter}" id="reimbursementBeanExampleUser"
+                                             value="#{reimbursementBean.example.user}">
+                                <f:selectItem/>
+                                <f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}"
+                                               value="#{userBean.all}" var="_item"/>
+                            </h:selectOneMenu>
+                            <h:message for="reimbursementBeanExampleUser" styleClass="error"/>
+                        </h:panelGroup>
+                        <h:outputText/>
+                        <h:outputLabel for="reimbursementBeanExampleConference" value="Conference:"/>
+                        <h:panelGroup>
+                            <h:selectOneMenu converter="#{conferenceBean.converter}"
+                                             id="reimbursementBeanExampleConference"
+                                             value="#{reimbursementBean.example.conference}">
+                                <f:selectItem/>
+                                <f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}"
+                                               value="#{conferenceBean.all}" var="_item"/>
+                            </h:selectOneMenu>
+                            <h:message for="reimbursementBeanExampleConference" styleClass="error"/>
+                        </h:panelGroup>
+                        <h:outputText/>
+                    </h:panelGrid>
+                    <h:panelGroup styleClass="buttons">
+                        <h:commandLink value="Search" action='#{reimbursementBean.search}'
+                                       styleClass="btn btn-primary"/>
+                        <h:commandLink value="Create New" action='#{reimbursementBean.create}'
+                                       styleClass="btn btn-primary"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </f:validateBean>
+
+            <h:dataTable id="reimbursementBeanPageItems" styleClass="data-table" value="#{reimbursementBean.pageItems}"
+                         var="_item">
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Date"/>
+                    </f:facet>
+                    <h:link outcome="/admin/reimbursement/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemDate" value="#{_item.date}">
+                            <f:convertDateTime type="date"/>
+                        </h:outputText>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Currency"/>
+                    </f:facet>
+                    <h:link outcome="/admin/reimbursement/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemCurrency" value="#{_item.currency}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="User"/>
+                    </f:facet>
+                    <h:link outcome="/admin/reimbursement/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="forgeviewdisplayitemUser" value="#{forgeview:display(_item.user)}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Conference"/>
+                    </f:facet>
+                    <h:link outcome="/admin/reimbursement/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="forgeviewdisplayitemConference"
+                                      value="#{forgeview:display(_item.conference)}"/>
+                    </h:link>
+                </h:column>
+            </h:dataTable>
+            <ui:include src="/resources/scaffold/paginator.xhtml">
+                <ui:param name="paginatorBean" value='#{reimbursementBean}'/>
+            </ui:include>
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>

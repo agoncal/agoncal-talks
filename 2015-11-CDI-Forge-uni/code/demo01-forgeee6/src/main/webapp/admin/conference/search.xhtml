@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="page" value='#{conferenceBean.page}'/>
+        <f:event type="preRenderView" listener='#{conferenceBean.paginate}'/>
+    </f:metadata>
+
+    <ui:param name="pageTitle" value="Search Conference entities"/>
+
+    <ui:define name="header">
+        Conference
+    </ui:define>
+
+    <ui:define name="subheader">
+        Search Conference entities
+    </ui:define>
+
+    <ui:define name="footer"/>
+
+    <ui:define name="main">
+        <h:form id="search">
+            <f:validateBean disabled="true">
+                <h:panelGroup styleClass="search">
+
+                    <h:panelGrid columnClasses="label,component,required" columns="3">
+                        <h:outputLabel for="conferenceBeanExampleName" value="Name:"/>
+                        <h:panelGroup>
+                            <h:inputText id="conferenceBeanExampleName" value="#{conferenceBean.example.name}"/>
+                            <h:message for="conferenceBeanExampleName" styleClass="error"/>
+                        </h:panelGroup>
+                        <h:outputText/>
+                        <h:outputLabel for="conferenceBeanExampleCountry" value="Country:"/>
+                        <h:panelGroup>
+                            <h:inputText id="conferenceBeanExampleCountry" value="#{conferenceBean.example.country}"/>
+                            <h:message for="conferenceBeanExampleCountry" styleClass="error"/>
+                        </h:panelGroup>
+                        <h:outputText/>
+                        <h:outputLabel for="conferenceBeanExampleCity" value="City:"/>
+                        <h:panelGroup>
+                            <h:inputText id="conferenceBeanExampleCity" value="#{conferenceBean.example.city}"/>
+                            <h:message for="conferenceBeanExampleCity" styleClass="error"/>
+                        </h:panelGroup>
+                        <h:outputText/>
+                    </h:panelGrid>
+                    <h:panelGroup styleClass="buttons">
+                        <h:commandLink value="Search" action='#{conferenceBean.search}' styleClass="btn btn-primary"/>
+                        <h:commandLink value="Create New" action='#{conferenceBean.create}'
+                                       styleClass="btn btn-primary"/>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </f:validateBean>
+
+            <h:dataTable id="conferenceBeanPageItems" styleClass="data-table" value="#{conferenceBean.pageItems}"
+                         var="_item">
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Name"/>
+                    </f:facet>
+                    <h:link outcome="/admin/conference/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemName" value="#{_item.name}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Date"/>
+                    </f:facet>
+                    <h:link outcome="/admin/conference/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemDate" value="#{_item.date}">
+                            <f:convertDateTime type="date"/>
+                        </h:outputText>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Country"/>
+                    </f:facet>
+                    <h:link outcome="/admin/conference/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemCountry" value="#{_item.country}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="City"/>
+                    </f:facet>
+                    <h:link outcome="/admin/conference/view">
+                        <f:param name="id" value="#{_item.id}"/>
+                        <h:outputText id="itemCity" value="#{_item.city}"/>
+                    </h:link>
+                </h:column>
+            </h:dataTable>
+            <ui:include src="/resources/scaffold/paginator.xhtml">
+                <ui:param name="paginatorBean" value='#{conferenceBean}'/>
+            </ui:include>
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>

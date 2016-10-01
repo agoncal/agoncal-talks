@@ -1,0 +1,8 @@
+= CDI & Forge university
+
+This repo contains Slides and code from Devoxx 2015 university.
+For slides generation you'll find more info in the slides repository
+
+Video of this conference is available on Youtube: http://youtu.be/LYKMaj4XKvg
+
+Slides are here: http://bit.ly/1MMaW9q

@@ -1,0 +1,53 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                template="/resources/scaffold/pageTemplate.xhtml">
+
+    <ui:param name="pageTitle" value="Signin"/>
+
+    <ui:define name="header">
+        Sign up
+    </ui:define>
+
+    <ui:define name="subheader">
+        Create a new account
+    </ui:define>
+
+    <ui:define name="main">
+        <h:form>
+            <h:messages globalOnly="true" styleClass="error"/>
+            <h:panelGrid columnClasses="label,component,required" columns="2">
+
+                <h:outputLabel for="inputLogin" class="col-sm-2 control-label" value="Login"/>
+                <h:inputText class="form-control" id="inputLogin" value="#{accountBean.user.login}"
+                             label="Login" required="true"/>
+
+                <h:outputLabel for="inputPassword1" class="col-sm-2 control-label" value="Password"/>
+                <h:inputSecret id="inputPassword1" value="#{accountBean.password1}" required="true"/>
+
+                <h:outputLabel for="inputPassword2" class="col-sm-2 control-label" value="Re-type Password"/>
+                <h:inputSecret id="inputPassword2" value="#{accountBean.password2}" required="true"/>
+
+                <h:outputLabel for="inputFirstName" class="col-sm-2 control-label" value="Name"/>
+                <h:inputText class="form-control" id="inputFirstName"
+                             value="#{accountBean.user.name}" required="true"/>
+
+                <h:outputLabel for="inputEmail" class="col-sm-2 control-label" value="Email"/>
+                <h:inputText pt:type="email" class="form-control" id="inputEmail"
+                             value="#{accountBean.user.email}" required="true"/>
+
+                <h:outputLabel for="inputRole" class="col-sm-2 control-label" value="Role"/>
+                <h:selectOneMenu value="#{accountBean.user.role}" class="form-control" id="inputRole">
+                    <f:selectItems value="#{accountBean.roles}"/>
+                </h:selectOneMenu>
+            </h:panelGrid>
+
+            <div class="buttons">
+                <h:commandButton class="btn btn-primary" value="Sign up" action="#{accountBean.doSignup}"/>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

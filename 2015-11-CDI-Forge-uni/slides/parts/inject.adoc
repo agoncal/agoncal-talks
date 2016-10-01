@@ -1,0 +1,108 @@
+[.intro]
+== @Inject
+
+[.topic]
+== _Almost_ Everything is a bean
+
+TIP: During boot time, the container scans each class to check if it meets the conditions to be a bean
+
+TIP: These conditions are very loose so, most _pojo_ classes are beans
+
+[source, subs="verbatim,quotes"]
+----
+public class HelloService { //<1>
+    public String hello() {
+        return "Hello World!";
+    }
+}
+----
+<1> `HelloService` is a concrete class with a default constructor, therefore it's a bean
+
+
+
+
+[.topic]
+== Injection in bean field
+
+TIP: A bean can inject other beans or be injected into other beans
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean { 
+    
+    [highlight]#@Inject# //<1>
+    private HelloService service; //<2>
+
+    public void displayHello() {
+        display(service.hello();
+    }
+}
+----
+<1> `@Inject` annotation defines an _injection point_ (here a field)
+<2> The container looksa for the bean to inject by its _type_ (here `HelloService`)
+
+[.topic]
+== Injection in bean constructor
+
+CAUTION: To become a bean a class must have a constructor with no parameters or a constructor annotated `@Inject`
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean {
+
+    private HelloService service;
+
+    [highlight]#@Inject#
+    private MyBean(HelloService service) {
+        this.service = service;
+    }
+}
+----
+
+CAUTION: Only one constructor can be annotated with `@Inject`
+
+[.topic]
+== Injection in a method
+
+TIP: Such method is called _initializer methods_
+
+[source, subs="verbatim,quotes"]
+----
+public class MyBean {
+
+    private HelloService service;
+
+    [highlight]#@Inject#
+    public void initService(HelloService service) {
+        this.service = service;
+    }
+}
+----
+
+TIP: all initializer methods are called at bean instantiation
+
+
+[.topic]
+== There could be only one
+
+[.smallest]
+====
+* icon:search[] Each _injection point_ is checked at boot time:
+====
+
+TIP: If no bean is eligible for it, the injection point is _unsatisfied_
+
+TIP: If multiple beans are eligible for it, the injection point is _ambiguous_
+
+CAUTION: In both case a `DeploymentException` is thrown by the container
+
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: Inject a Logger into `UserService`
+
+TIP: Log a message in `persist` method
+
+====

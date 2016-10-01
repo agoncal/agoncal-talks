@@ -1,0 +1,93 @@
+[.intro]
+== Events
+
+More decoupling with
+
+[.source]
+== Events in action
+
+[source, subs="verbatim,quotes", role="smaller"]
+----
+public class FirstBean {
+    @Inject [highlight]#Event<Post># postEvent; //<1>
+
+    public void saveNewPost(Post myPost) {
+        postEvent.[highlight]*fire(myPost)*; //<2>
+    }
+}
+
+public class SecondBean {
+    public void listenPost([highlight]*@Observes* Post post) { //<3>
+        System.out.println("Received : " + evt.message());
+    }
+}
+----
+<1> `Event<T>` is injected at the firing side. `T` is the event payload type (here my `Post` class)
+<2> When needed, we fire the event with our instance of `T` (here the `Post` object to save)
+<3> At the consuming side, we define an observer for a given payload type with `@Observes` annotation.
+If observed type match fired event type, the observer is called.
+
+[.source]
+== Observer resolution mimics typesafe resolution (in a looser way)
+
+[source, subs="verbatim,quotes"]
+----
+public class FirstBean {
+    @Inject Event<Post> postEvent;
+
+    public void saveNewPost(Post myPost) {
+        postEvent.select(new AnnotationLiteral()<French> {}).fire(myPost);
+    }
+}
+
+public class SecondBean {
+    public void listenFrPost(@Observes @French Post post) {} //<1>
+    public void listenPost(@Observes Post post) {} //<1>
+    public void listenObject(@Observes Object obj) {} //<1>
+    public void listenEnPost(@Observes @English Post post) {} //<2>
+}
+----
+<1> These observers will be triggered (empty subset is accepted for qualifiers when resolving observers)
+<2> This observer won't be triggered
+
+[.source]
+== Hooking on context lifecycle with events
+
+[source, subs="verbatim,quotes",role="smallest"]
+----
+public class SecondBean {
+    public void beginRequest(@Observes @Initialized(RequestScoped.class) ServletRequest req) {}
+
+    public void endRequest(@Observes @Destroyed(RequestScoped.class) ServletRequest req) {}
+
+    public void beginSession(@Observes @Initialized(SessionScoped.class) HttpSession session) {}
+
+    public void endSession(@Observes @Destroyed(SessionScoped.class) HttpSession session) {}
+
+    public void beginApplication(@Observes @Initialized(ApplicationScoped.class) ServlerContext ctx) {}
+
+    public void endApplication(@Observes @Destroyed(ApplicationScoped.class) ServlerContext ctx) {}
+}
+----
+
+CAUTION: Observer must be defined in a bean
+
+CAUTION: Observer resolution may trigger bean instance creation.
+
+CAUTION: So observers above are a nice way to initailize bean with its context
+
+//TODO: add slides for observer injection and eventmetadata, transactional events and reception
+
+
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: `BankingService` is the observer
+
+TIP: `ReimburseService` fires the event
+
+TIP: The event is typed to `Reimbursement`
+
+====

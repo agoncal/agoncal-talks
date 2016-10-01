@@ -1,0 +1,121 @@
+[.intro]
+== Introducing CDI Portable Extensions
+
+[.topic.source]
+== Portable extensions
+
+[.statement]
+====
+
+ifdef::includegifs[]
+image::powerful.gif[role="pull-right", width="270"]
+endif::includegifs[]
+
+NOTE: One of the _most powerful feature_ of the CDI specification
+
+NOTE: Not really popularized, partly due to:
+
+. Their _high level of abstraction_
+. The good knowledge on Basic CDI and SPI
+. Lack of information (CDI is often reduced to a basic DI solution)
+====
+
+
+[.topic.source]
+== Extensions, what for?
+
+[.statement]
+====
+
+TIP: To integrate 3rd party libraries, frameworks or legacy components
+
+TIP: To change existing configuration or behavior
+
+TIP: To extend CDI and Java EE
+
+TIP: Thanks to them, Java EE can evolve between major releases
+
+====
+
+
+[.topic.source]
+== Extensions, how?
+
+[.statement]
+====
+
+ifdef::includegifs[]
+image::rubik.gif[role="pull-right", width="250"]
+endif::includegifs[]
+
+TIP: Observing SPI events at boot time related to the bean manager lifecycle
+
+TIP: Checking what meta-data are being created
+
+TIP: Modifying these meta-data or creating new ones
+
+====
+
+
+[.topic.source]
+== More concretely
+
+NOTE: Service provider of the service `javax.enterprise.inject.spi.Extension` declared in `META-INF/services`
+
+TIP: Just put the fully qualified name of your extension class in this file
+
+[source, subs="verbatim,quotes", role="smaller"]
+----
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.Extension;
+
+public class CdiExtension [highlight]#implements Extension# {
+
+    void beforeBeanDiscovery([highlight]#@Observes BeforeBeanDiscovery# bbd) {
+    }
+    //...
+
+    void afterDeploymentValidation([highlight]#@Observes AfterDeploymentValidation# adv) {
+    }
+}
+----
+
+
+[.topic.source]
+== Bean manager lifecycle
+
+
+plantuml::diagrams/lifecycle.puml[cdi-lifecycle, format=svg, width=95%, height=85%]
+
+plantuml::diagrams/lifecyclelegend.puml[cdi-lifecycle-legend, format=svg, width=230, height=40, role=pull-right]
+
+
+[.topic.source]
+== Example: Ignoring JPA entities
+
+TIP: The following extension prevents CDI to manage entities
+
+NOTE: This is a commonly admitted good practice
+
+[source]
+----
+public class VetoEntity implements Extension {
+
+    void vetoEntity(@Observes @WithAnnotations(Entity.class)
+                    ProcessAnnotatedType<?> pat) {
+        pat.veto();
+    }
+}
+----
+
+
+[.topic.recap]
+== Remember
+
+icon:warning[] Extensions are _launched during +
+  bootstrap_ and are _based on CDI events_
+
+icon:warning[] Once the application is bootstrapped, +
+  the Bean Manager is in _read-only mode_ (no runtime bean registration)
+
+icon:warning[] You only have to `@Observes` _built-in CDI events_ to create your extensions

@@ -1,0 +1,142 @@
+[.intro]
+== Interceptors and Decorators
+
+[.topic]
+== Interceptors vs Decorators
+
+TIP: They are both *Aspect Oriented Programming* tools
+
+TIP: *Interceptors* are *technical oriented*: transaction, security, logging
+
+TIP: *Interceptors* are *bound* to any bean or *bean method*
+
+TIP: *Decorators* are *business oriented*: change the behaviour of a bean
+
+TIP: *Decorators* are *bound* to a *bean type*
+
+[.topic]
+== Interceptors
+
+TIP: *Interceptors* are defined in their *own specification*
+
+TIP: User should create an *annotation* as an *interceptor binding*
+
+TIP: *Interceptor class* must be *bound* to an *interceptor binding*
+
+TIP: Interceptor class contains *intercepting methods* +
+which are bound to *lifecycle phase* of intercepted bean
+
+TIP: *Interceptor binding* is added to *intercepted bean* or *method*
+
+[.topic]
+== Interceptor binding example
+
+CAUTION: An _interceptor binding_ is _annotation_ used in two different places
+
+CAUTION: On the _interceptor_ and on the _intercepted element_ to link them
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@InterceptorBinding* //<1>
+@Target({METHOD, TYPE})
+@Retention(RUNTIME)
+public @interface Loggable {}
+----
+<1> This annotation comes from interceptor specification. It makes `@Loggable` an interceptor binding
+
+[.source]
+== Interceptor example
+
+[source, subs="verbatim,quotes",role="smaller"]
+----
+[highlight]*@Interceptor* //<1>
+[highlight]*@Loggable* //<2>
+[highlight]*@Priority(Interceptor.Priority.APPLICATION)* //<3>
+public class LogInterceptor {
+  [highlight]*@AroundInvoke* //<4>
+  public Object log(InvocationContext ic) throws Exception {
+      System.out.println("Entering " + ic.getMethod().getName());
+      try {
+          return ic.proceed();
+      } finally {
+          System.out.println("Exiting " + ic.getMethod().getName());
+      }
+  }
+}
+----
+<1> We make the class an interceptor (`@Interceptor` comes from Interceptor spec)
+<2> We bind this interceptor to the `@Loggable` interceptor binding
+<3> We activate and give a priority to the interceptor (can be done in `beans.xml` config file as well)
+<4> This intercepting method will be invoked instead of the intercepted one.
+
+
+[.topic]
+== Interceptor Usage
+
+[source, subs="verbatim,quotes"]
+----
+[highlight]*@Loggable* //<1>
+public class MyBean { ... }
+
+public class MyOtherBean {
+
+    [highlight]*@Loggable* //<2>
+    public String hello() { ... }
+
+}
+
+----
+<1> All bean's method will be intercepted
+<2> This method will be intercepted
+
+
+[.topic]
+== Decorators
+
+TIP: To be decorated, a *bean* should *implement* an *interface*
+
+TIP: The *decorator* has to *implement the same interface*
+
+TIP: It is *declared* with *`@Decorator`* annotation
+
+TIP: It can be an *abstract class* (lets you choose methods to decorate)
+
+TIP: It *injects* the decorated *bean* with *`@Delegate`* annotation
+
+
+[.source]
+== Decorator Example
+
+[source, subs="verbatim,quotes", role="smaller"]
+----
+[highlight]*@Decorator* //<1>
+[highlight]*@Priority(Interceptor.Priority.APPLICATION)* //<2>
+public [highlight]*abstract* class HelloDecorator [highlight]*implements HelloService* { //<3>
+
+    _@Inject_ [highlight]*@Delegate* HelloService service; //<4>
+
+    public String hello() { //<5>
+        return service.hello() + "-decorated";
+    }
+}
+----
+<1> Declares that the class is a decorator
+<2> Activates and gives a priority to the decorator (could be done via `beans.xml` file)
+<3> Decorators can be abstract and should share the same interface than decorated beans
+<4> Decorated bean is annotated with `@Delegate` (other beans could be injected in decorator)
+<5> Decorating method is called instead of decorated bean method. Delegate can be used in it.
+
+[.recap]
+== Back to demo
+[.statement]
+====
+TIP: Create a `@Loggable` interceptor binding
+
+TIP: Create a `LoggingInterceptor`
+
+TIP: Add `LoggingInterceptor` to each service
+
+TIP: Enable interceptor in the `beans.xml`
+
+====
+
