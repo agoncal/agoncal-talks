@@ -1,0 +1,4 @@
+wildflyswarm:
+  build: .
+  ports:
+    - "8082:8082"
