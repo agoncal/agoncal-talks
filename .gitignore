@@ -1,0 +1,18 @@
+## Mac
+.DS_Store
+
+## Asciidoctor
+slides/*.html
+
+## Java
+rebel.xml
+.classpath
+.project
+.settings/
+target/
+logs/
+.idea/
+*/.idea/
+*.iml
+*.svg
+*.svg.cache
