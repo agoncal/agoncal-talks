@@ -1,0 +1,16 @@
+.classpath
+.project
+.settings
+.DS_Store
+target/
+typings/
+bower_components/
+node_modules/
+*.ddl
+*.iml
+*.ipr
+*.iws
+*.swp
+.idea
+*.log
+*dummy*
