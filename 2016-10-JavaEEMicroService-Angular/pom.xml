@@ -365,15 +365,6 @@
                     <groupId>com.spotify</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
                     <version>${version.docker.plugin}</version>
-                    <executions>
-                        <execution>
-                            <id>default-build</id>
-                            <goals>
-                                <goal>build</goal>
-                            </goals>
-                            <phase>package</phase>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

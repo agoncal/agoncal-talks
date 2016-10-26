@@ -168,7 +168,7 @@
                         <version>${version.wildfly-swarm}</version>
                         <configuration>
                             <properties>
-                                <swarm.http.port>8086</swarm.http.port>
+                                <swarm.http.port>8080</swarm.http.port>
                                 <swarm.context.path>${project.build.finalName}</swarm.context.path>
                             </properties>
                         </configuration>
@@ -220,6 +220,15 @@
                                 </resource>
                             </resources>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-build</id>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -263,11 +272,20 @@
                                 <resource>
                                     <directory>${project.build.directory}</directory>
                                     <includes>
-                                        <include>demo01-conference-venue.war</include>
+                                        <include>demo01-conference-venue-swarm.jar</include>
                                     </includes>
                                 </resource>
                             </resources>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-build</id>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
