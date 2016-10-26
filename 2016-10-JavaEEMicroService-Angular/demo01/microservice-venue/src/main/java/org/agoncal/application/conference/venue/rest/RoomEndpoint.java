@@ -44,7 +44,7 @@ public class RoomEndpoint {
 
     @GET
     @Path("/{id}")
-    public Response retrieve(@PathParam("id") String id, @Context Request request) {
+    public Response retrieve(@PathParam("id") String id) {
 
         Room room = roomRepository.findById(id);
 
