@@ -365,23 +365,6 @@
                     <groupId>com.spotify</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
                     <version>${version.docker.plugin}</version>
-                    <configuration>
-                        <dockerDirectory>${project.build.directory}/docker</dockerDirectory>
-                        <imageName>agoncal/${project.artifactId}
-                        </imageName>
-                        <imageTags>
-                            <!--<imageTag>${project.version}</imageTag>-->
-                            <imageTag>latest</imageTag>
-                        </imageTags>
-                        <resources>
-                            <resource>
-                                <directory>${project.build.directory}</directory>
-                                <includes>
-                                    <include>${project.build.finalName}.war</include>
-                                </includes>
-                            </resource>
-                        </resources>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>default-build</id>
