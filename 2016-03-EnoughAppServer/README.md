@@ -40,3 +40,7 @@ Each of the three applications have Dockerfiles. On each one you can build and s
 * [http://docker.local:8082/topbooks]()
 * [http://docker.local:8081/topcds]()
 
+## Maven
+
+* `mvn versions:display-plugin-updates` checks plugin versions
+
