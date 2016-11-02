@@ -1,0 +1,15 @@
+version: "2"
+
+services:
+    cdbookstore:
+        image: agoncal/cdbookstore:war
+        ports:
+            - 8080:8080
+    topbooks:
+        image: agoncal/topbooks:war
+        ports:
+            - 8081:8080
+    topcds:
+        image: agoncal/topcds:war
+        ports:
+            - 8082:8080
