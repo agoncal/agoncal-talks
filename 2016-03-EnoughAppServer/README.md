@@ -34,11 +34,18 @@ In this configuration the 3 applications are packaged as three seperate fat exec
 
 ## Docker
 
-Each of the three applications have Dockerfiles. On each one you can build and start it up with `docker-compose up`. Then, access it with : 
+Each of the three applications have Dockerfiles. On each one you can build and start it up with `docker run`. Then, access it with : 
 
 * [http://docker.local:8080/cdookstore]()
 * [http://docker.local:8082/topbooks]()
 * [http://docker.local:8081/topcds]()
+
+### Useful commands
+
+* `/bin/bash -c 'docker rmi -f $(docker images -q --filter dangling=true)'`
+* `/bin/bash -c 'docker rmi -f $(docker images "agoncal/topbooks*" -q)'`
+* `/bin/bash -c 'docker rmi -f $(docker images "agoncal/topcds*" -q)'`
+* `/bin/bash -c 'docker rmi -f $(docker images "agoncal/cdbookstore*" -q)'`
 
 ## Maven
 
