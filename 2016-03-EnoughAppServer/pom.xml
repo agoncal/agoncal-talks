@@ -8,7 +8,7 @@
     <artifactId>parent</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
-    <name>00 - Parent of Enough App Server Sample</name>
+    <name>Enough App Server</name>
 
     <prerequisites>
         <maven>3.3</maven>

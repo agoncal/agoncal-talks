@@ -13,6 +13,7 @@
     <artifactId>topcds</artifactId>
     <version>1.0</version>
     <packaging>war</packaging>
+    <name>Enough App Server :: Top CDs</name>
 
     <dependencies>
         <dependency>

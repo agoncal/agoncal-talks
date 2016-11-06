@@ -13,6 +13,7 @@
     <artifactId>cdbookstore</artifactId>
     <version>1.0</version>
     <packaging>war</packaging>
+    <name>Enough App Server :: CD BookStore</name>
 
     <dependencies>
         <dependency>
