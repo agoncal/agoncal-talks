@@ -1,15 +1,15 @@
 version: "2"
 
 services:
-    cdbookstore:
+    web-cdbookstore:
         image: agoncal/cdbookstore:jar
         ports:
             - 8080:8080
-    topbooks:
+    ms-topbooks:
         image: agoncal/topbooks:jar
         ports:
             - 8082:8082
-    topcds:
+    ms-topcds:
         image: agoncal/topcds:jar
         ports:
             - 8081:8081

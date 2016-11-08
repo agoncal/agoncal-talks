@@ -174,16 +174,6 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/docker/jar</directory>
-                        <targetPath>${project.build.directory}/docker</targetPath>
-                        <includes>
-                            <include>Dockerfile</include>
-                        </includes>
-                    </resource>
-                </resources>
-
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -193,6 +183,24 @@
                         </configuration>
                     </plugin>
 
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <copy file="${basedir}/src/main/docker/jar/Dockerfile" todir="${project.build.directory}/docker"/>
+                                        <copy file="${project.build.directory}/cdbookstore-swarm.jar" todir="${project.build.directory}/docker"/>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
@@ -231,16 +239,6 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/docker/war</directory>
-                        <targetPath>${project.build.directory}/docker</targetPath>
-                        <includes>
-                            <include>Dockerfile</include>
-                        </includes>
-                    </resource>
-                </resources>
-
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -250,6 +248,24 @@
                         </configuration>
                     </plugin>
 
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <copy file="${basedir}/src/main/docker/war/Dockerfile" todir="${project.build.directory}/docker"/>
+                                        <copy file="${project.build.directory}/cdbookstore.war" todir="${project.build.directory}/docker"/>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
