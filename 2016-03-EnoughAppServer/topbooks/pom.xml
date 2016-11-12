@@ -48,6 +48,7 @@
                     <plugin>
                         <groupId>org.wildfly.swarm</groupId>
                         <artifactId>wildfly-swarm-plugin</artifactId>
+                        <version>${version.wildfly-swarm}</version>
                         <configuration>
                             <properties>
                                 <swarm.http.port>8082</swarm.http.port>
@@ -80,6 +81,7 @@
                     <plugin>
                         <groupId>org.wildfly.swarm</groupId>
                         <artifactId>wildfly-swarm-plugin</artifactId>
+                        <version>${version.wildfly-swarm}</version>
                         <configuration>
                             <bundleDependencies>false</bundleDependencies>
                             <properties>
@@ -117,6 +119,7 @@
                     <plugin>
                         <groupId>org.wildfly.swarm</groupId>
                         <artifactId>wildfly-swarm-plugin</artifactId>
+                        <version>${version.wildfly-swarm}</version>
                         <configuration>
                             <properties>
                                 <swarm.http.port>8082</swarm.http.port>
@@ -138,6 +141,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${version.maven.surefire.plugin}</version>
                         <configuration>
                             <skipTests>true</skipTests>
                         </configuration>
@@ -146,6 +150,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${version.maven.ant.plugin}</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
@@ -153,10 +158,10 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks>
+                                    <target>
                                         <copy file="${basedir}/src/main/docker/jar/Dockerfile" todir="${project.build.directory}/docker"/>
                                         <copy file="${project.build.directory}/topbooks-swarm.jar" todir="${project.build.directory}/docker"/>
-                                    </tasks>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>
@@ -164,6 +169,7 @@
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
+                        <version>${version.maven.docker.plugin}</version>
                         <configuration>
                             <dockerDirectory>${project.build.directory}/docker</dockerDirectory>
                             <imageName>agoncal/topbooks</imageName>
@@ -203,6 +209,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${version.maven.surefire.plugin}</version>
                         <configuration>
                             <skipTests>true</skipTests>
                         </configuration>
@@ -218,10 +225,10 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks>
+                                    <target>
                                         <copy file="${basedir}/src/main/docker/war/Dockerfile" todir="${project.build.directory}/docker"/>
                                         <copy file="${project.build.directory}/topbooks.war" todir="${project.build.directory}/docker"/>
-                                    </tasks>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>
@@ -229,6 +236,7 @@
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
+                        <version>${version.maven.docker.plugin}</version>
                         <configuration>
                             <dockerDirectory>${project.build.directory}/docker</dockerDirectory>
                             <imageName>agoncal/topbooks</imageName>
