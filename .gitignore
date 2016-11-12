@@ -15,7 +15,8 @@ rebel.xml
 target/
 logs/
 .idea/
-*/	.idea/
+*/.idea/
 *.iml
 *.svg
 *.svg.cache
+*.versionsBackup
