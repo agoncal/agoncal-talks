@@ -49,7 +49,7 @@
         <version.assertj>3.5.2</version.assertj>
 
         <!-- App servers -->
-        <version.wildfly-swarm>2016.11.0</version.wildfly-swarm>
+        <version.wildfly-swarm>2017.1.1</version.wildfly-swarm>
         <version.wildfly>10.1.0.Final</version.wildfly>
 
         <!-- Dependencies -->

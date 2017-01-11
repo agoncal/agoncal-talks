@@ -24,8 +24,17 @@
 
 ### Docker
 
+#### Clean
+
+* `docker images`
+* `/bin/bash -c 'docker rmi -f $(docker images -q --filter dangling=true)'`
+* `/bin/bash -c 'docker rmi -f $(docker images "agoncal/demo*" -q)'`
+
+#### Show
+
 * `mvn clean package -Pdocker-war`
 * `mvn clean package -Pswarm,docker-jar`
 * Look at the image creation time and image size
 * `docker run -p8080:8080 <hash>`
+* `docker run -p9191:9191 <hash>`
 * Change the repository class and re create the image

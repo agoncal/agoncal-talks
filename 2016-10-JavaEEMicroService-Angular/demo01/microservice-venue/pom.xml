@@ -169,7 +169,7 @@
                         <configuration>
                             <properties>
                                 <swarm.http.port>9191</swarm.http.port>
-                                <swarm.context.path>conference-venue</swarm.context.path>
+                                <swarm.context.path>demo01-conference-venue</swarm.context.path>
                             </properties>
                         </configuration>
                     </plugin>
