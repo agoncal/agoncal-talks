@@ -49,7 +49,7 @@
         <version.assertj>3.5.2</version.assertj>
 
         <!-- App servers -->
-        <version.wildfly-swarm>2017.1.1</version.wildfly-swarm>
+        <version.wildfly-swarm>2017.2.0</version.wildfly-swarm>
         <version.wildfly>10.1.0.Final</version.wildfly>
 
         <!-- Dependencies -->
@@ -64,59 +64,10 @@
 
     <modules>
         <module>demo01</module>
-        <module>demo02</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
-            <!-- CONFERENCE -->
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>conference-commons</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>conference-commons</artifactId>
-                <version>${project.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>conference-commons-jwt</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>microservice-attendee</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>microservice-rating</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>microservice-schedule</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>microservice-speaker</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>microservice-talk</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.agoncal.application.conference</groupId>
-                <artifactId>microservice-venue</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <!-- JAVA EE -->
             <dependency>

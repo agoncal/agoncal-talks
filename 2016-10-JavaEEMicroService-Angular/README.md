@@ -1,20 +1,8 @@
 # Java EE Micro Services and Angular (University) 
 
-## Demo 01
+## Demo 01 - WildFly Swarm
 
-### REST Service 
-
-* Show `RoomEndpoint`
-* Run war in WildFly
-* Check URL `http://localhost:8080/demo01-conference-venue/api/rooms`
-
-### Arquillian Test
-
-* Show `RoomEndpointTest`
-* `mvn clean test  -Parquillian-wildfly-remote`
-* `mvn clean test  -Parquillian-wildfly-managed`
-
-### WildFly Swarm
+### Size of War / Jar
 
 * Show `pom.xml` and profile `swarm`
 * `mvn clean package`
@@ -22,15 +10,37 @@
 * `mvn clean package -Pswarm`
 * `ll target/`
 
-### Docker
+### Execute
 
-#### Clean
+* Show `RoomEndpoint`
+* Run Jar `java -jar target/demo01-conference-venue-swarm.jar`
+* Check URL `http://localhost:9191/demo01-conference-venue/api/rooms`
+
+## Demo 02 - NG CLI
+
+Set Yarn as the default package manager
+
+```
+ng set --global packageManager=yarn
+```
+
+Then create the project 
+
+```
+ng version
+ng new conference-web
+
+```
+
+## Demo 03 - Docker
+
+### Clean images
 
 * `docker images`
 * `/bin/bash -c 'docker rmi -f $(docker images -q --filter dangling=true)'`
 * `/bin/bash -c 'docker rmi -f $(docker images "agoncal/demo*" -q)'`
 
-#### Show
+### Build both Jar/War Docker images
 
 * `mvn clean package -Pdocker-war`
 * `mvn clean package -Pswarm,docker-jar`

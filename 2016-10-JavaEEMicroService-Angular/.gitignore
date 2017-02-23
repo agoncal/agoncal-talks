@@ -14,3 +14,4 @@ node_modules/
 .idea
 *.log
 *dummy*
+conference-web/
