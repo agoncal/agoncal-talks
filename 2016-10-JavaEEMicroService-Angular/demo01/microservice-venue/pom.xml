@@ -15,15 +15,14 @@
     <name>Micro Angular :: Demo 01 :: Venue</name>
     <packaging>war</packaging>
 
-    <build>
-        <finalName>demo01-conference-venue</finalName>
-
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
 
         <!-- TEST -->
@@ -62,8 +61,37 @@
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
         </dependency>
-
     </dependencies>
+
+    <build>
+        <finalName>demo01-conference-venue</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <configuration>
+                    <apiSources>
+                        <apiSource>
+                            <springmvc>false</springmvc>
+                            <locations>org.agoncal.application.conference.venue.rest</locations>
+                            <schemes>http,https</schemes>
+                            <host>localhost:9191</host>
+                            <basePath>/api</basePath>
+                            <info>
+                                <title>Room</title>
+                                <version>1.0.0</version>
+                                <description>Gives all the details of the rooms of the venue</description>
+                            </info>
+                            <swaggerDirectory>${basedir}/src/main/webapp</swaggerDirectory>
+                            <outputFormats>json</outputFormats>
+                            <!--<outputFormats>yaml</outputFormats>-->
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>
