@@ -15,11 +15,14 @@ This repository has a `.yo-rc.json` file and a JDL one for the model. So you can
 
 ```
 $ jhipster # jhipster --skip-git if you want to skip adding to GIT
-$ jhipster import organisation.jdl
-
+$ jhipster import-jdl organisation.jdl
 ```
 
 ## Add your custom code side by side
+
+### Repository
+
+
 
 
 
