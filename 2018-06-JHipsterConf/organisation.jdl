@@ -1,0 +1,110 @@
+
+NAME_MAX_LENGTH = 50
+DESCRIPTION_MAX_LENGTH = 1024
+CODE_MAX_LENGTH = 15
+SLUG_MAX_LENGTH = 15
+SLUG_MIN_LENGTH = 1
+EMAIL_MAX_LENGTH = 100
+EMAIL_MIN_LENGTH = 5
+URL_MAX_LENGTH = 256
+
+entity Contact (spn_contact) {
+    firstName String required maxlength(NAME_MAX_LENGTH),
+    lastName String required maxlength(NAME_MAX_LENGTH),
+    activated Boolean,
+    email String required minlength(EMAIL_MIN_LENGTH) maxlength(EMAIL_MAX_LENGTH),
+    phoneArea String,
+    phoneNumber String
+}
+
+entity Occupation (spn_occupation) {
+    category String required maxlength(NAME_MAX_LENGTH),
+    name String required maxlength(NAME_MAX_LENGTH),
+}
+
+entity Organisation (spn_organisation) {
+    slug String required minlength(SLUG_MIN_LENGTH) maxlength(SLUG_MAX_LENGTH),
+    name String required maxlength(NAME_MAX_LENGTH),
+    description String maxlength(DESCRIPTION_MAX_LENGTH),
+    businessIdentification String,
+    corporateName String,
+    domainName String,
+    phoneArea String,
+    phoneNumber String
+    vatIdentification String,
+    webSite String,
+    additionalInformation String,
+    activated Boolean,
+    createdOn Instant
+}
+
+entity IndustrySector (spn_industry_sector) {
+    name String required maxlength(NAME_MAX_LENGTH)
+}
+
+entity Address (spn_address) {
+    street String,
+    street2 String,
+    city String,
+    state String,
+    zipCode String,
+    additionalInformation String
+}
+
+/**
+* iso2 codes are two-letter country codes defined in ISO 3166-1
+* iso3 codes are three-letter country codes defined in ISO 3166-1
+* M.49 is a standard for area codes used by the United Nations for statistical purposes
+* dial number to dial for phone numbers
+* tld  top-level domains
+*/
+entity Country (spn_country) {
+    iso2 String required maxlength(2),
+    iso3 String required maxlength(3),
+    m49 Integer required,
+    name String required,
+    officialNameEn String,
+    officialNameFr String,
+    dial String maxlength(5),
+    continent Continent required,
+    tld String maxlength(3),
+    flag32	String,
+    flag128 String,
+    latitude String,
+    longitude String,
+    zoom Integer
+}
+
+enum Continent {
+    AF, AN, AS, EU, NA, OC, SA
+}
+
+entity Language (spn_language) {
+    alpha3b String required maxlength(3),
+    alpha2 String required maxlength(2)
+    name String required,
+    flag32	String,
+    flag128 String,
+    activated Boolean
+}
+
+
+relationship OneToOne {
+    Organisation{address} to Address
+}
+
+relationship OneToMany {
+    Organisation{contacts(lastName)} to Contact{organisation(name) required}
+}
+
+relationship ManyToOne {
+    Contact{occupation(name)} to Occupation,
+	Organisation{industrySector(name)} to IndustrySector,
+	Address{country(name)} to Country,
+    Contact{language(name) required} to Language
+}
+
+service * with serviceClass
+dto * with mapstruct
+paginate * with pagination
+filter *
