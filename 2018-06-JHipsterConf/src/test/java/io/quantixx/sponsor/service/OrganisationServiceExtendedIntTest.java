@@ -3,7 +3,6 @@ package io.quantixx.sponsor.service;
 import io.quantixx.sponsor.SponsorApp;
 import io.quantixx.sponsor.domain.Contact;
 import io.quantixx.sponsor.domain.Organisation;
-import io.quantixx.sponsor.service.dto.OrganisationWithContactsDTO;
 import io.quantixx.sponsor.web.rest.ContactResourceIntTest;
 import io.quantixx.sponsor.web.rest.OrganisationResourceIntTest;
 import org.junit.Before;
@@ -32,7 +31,7 @@ public class OrganisationServiceExtendedIntTest {
     private OrganisationServiceExtended organisationService;
 
     @Autowired
-    private ContactServiceExtended contactService;
+    private ContactService contactService;
 
     @Before
     public void setup() {
@@ -67,9 +66,9 @@ public class OrganisationServiceExtendedIntTest {
 
 
         // Should find the organisation with contacts
-        OrganisationWithContactsDTO organisationDTO = organisationService.findOneWithEagerRelationships(organisation.getId()).get();
-        assertThat(organisationDTO.getId()).isNotNull();
-        assertThat(organisationDTO.getContacts().size()).isEqualTo(3);
+        organisation = organisationService.findOneWithEagerRelationships(organisation.getId()).get();
+        assertThat(organisation.getId()).isNotNull();
+        assertThat(organisation.getContacts().size()).isEqualTo(3);
         assertThat(organisation.getContacts().iterator().next().getId()).isNotNull();
     }
 

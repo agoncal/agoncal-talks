@@ -188,9 +188,8 @@ public class OrganisationResourceExtendedIntTest {
         assertThat(testOrganisation.isActivated()).isEqualTo(DEFAULT_ACTIVATED);
         assertThat(testOrganisation.getCreatedOn()).isEqualTo(DEFAULT_CREATED_ON);
 
-
         Organisation organisationWithContacts = organisationRepository.findOneWithEagerRelationships(testOrganisation.getId()).get();
-        assertThat(organisationWithContacts.getContacts()).isEqualTo(3);
+        assertThat(organisationWithContacts.getContacts().size()).isEqualTo(3);
 
     }
 
