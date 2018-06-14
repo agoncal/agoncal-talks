@@ -12,7 +12,7 @@ import java.util.Optional;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface OrganisationExtendedRepository extends OrganisationRepository  {
+public interface OrganisationRepositoryExtended extends OrganisationRepository  {
 
     @Query("select spn_organisation from Organisation spn_organisation left join fetch spn_organisation.contacts where spn_organisation.id =:id")
     Optional<Organisation> findOneWithEagerRelationships(@Param("id") Long id);
