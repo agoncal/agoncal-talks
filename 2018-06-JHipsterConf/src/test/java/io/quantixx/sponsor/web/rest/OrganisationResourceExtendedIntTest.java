@@ -5,13 +5,9 @@ import io.quantixx.sponsor.domain.Address;
 import io.quantixx.sponsor.domain.Contact;
 import io.quantixx.sponsor.domain.IndustrySector;
 import io.quantixx.sponsor.domain.Organisation;
-import io.quantixx.sponsor.repository.OrganisationRepository;
 import io.quantixx.sponsor.repository.OrganisationRepositoryExtended;
 import io.quantixx.sponsor.service.OrganisationQueryService;
-import io.quantixx.sponsor.service.OrganisationService;
 import io.quantixx.sponsor.service.OrganisationServiceExtended;
-import io.quantixx.sponsor.service.dto.OrganisationDTO;
-import io.quantixx.sponsor.service.mapper.OrganisationMapper;
 import io.quantixx.sponsor.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,10 +84,6 @@ public class OrganisationResourceExtendedIntTest {
 
     @Autowired
     private OrganisationRepositoryExtended organisationRepository;
-
-
-    @Autowired
-    private OrganisationMapper organisationMapper;
 
 
     @Autowired
@@ -173,10 +165,9 @@ public class OrganisationResourceExtendedIntTest {
         int databaseSizeBeforeCreate = organisationRepository.findAll().size();
 
         // Create the Organisation
-        OrganisationDTO organisationDTO = organisationMapper.toDto(organisation);
         restOrganisationMockMvc.perform(post("/api/extended/organisations")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(organisationDTO)))
+            .content(TestUtil.convertObjectToJsonBytes(organisation)))
             .andExpect(status().isCreated());
 
         // Validate the Organisation in the database
@@ -210,12 +201,11 @@ public class OrganisationResourceExtendedIntTest {
 
         // Create the Organisation with an existing ID
         organisation.setId(1L);
-        OrganisationDTO organisationDTO = organisationMapper.toDto(organisation);
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restOrganisationMockMvc.perform(post("/api/extended/organisations")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(organisationDTO)))
+            .content(TestUtil.convertObjectToJsonBytes(organisation)))
             .andExpect(status().isBadRequest());
 
         // Validate the Organisation in the database
@@ -231,11 +221,10 @@ public class OrganisationResourceExtendedIntTest {
         organisation.setSlug(null);
 
         // Create the Organisation, which fails.
-        OrganisationDTO organisationDTO = organisationMapper.toDto(organisation);
 
         restOrganisationMockMvc.perform(post("/api/extended/organisations")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(organisationDTO)))
+            .content(TestUtil.convertObjectToJsonBytes(organisation)))
             .andExpect(status().isBadRequest());
 
         List<Organisation> organisationList = organisationRepository.findAll();
@@ -250,11 +239,10 @@ public class OrganisationResourceExtendedIntTest {
         organisation.setName(null);
 
         // Create the Organisation, which fails.
-        OrganisationDTO organisationDTO = organisationMapper.toDto(organisation);
 
         restOrganisationMockMvc.perform(post("/api/extended/organisations")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(organisationDTO)))
+            .content(TestUtil.convertObjectToJsonBytes(organisation)))
             .andExpect(status().isBadRequest());
 
         List<Organisation> organisationList = organisationRepository.findAll();
@@ -945,11 +933,10 @@ public class OrganisationResourceExtendedIntTest {
             .additionalInformation(UPDATED_ADDITIONAL_INFORMATION)
             .activated(UPDATED_ACTIVATED)
             .createdOn(UPDATED_CREATED_ON);
-        OrganisationDTO organisationDTO = organisationMapper.toDto(updatedOrganisation);
 
         restOrganisationMockMvc.perform(put("/api/extended/organisations")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(organisationDTO)))
+            .content(TestUtil.convertObjectToJsonBytes(updatedOrganisation)))
             .andExpect(status().isOk());
 
         // Validate the Organisation in the database
@@ -977,12 +964,11 @@ public class OrganisationResourceExtendedIntTest {
         int databaseSizeBeforeUpdate = organisationRepository.findAll().size();
 
         // Create the Organisation
-        OrganisationDTO organisationDTO = organisationMapper.toDto(organisation);
 
         // If the entity doesn't have an ID, it will be created instead of just being updated
         restOrganisationMockMvc.perform(put("/api/extended/organisations")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(organisationDTO)))
+            .content(TestUtil.convertObjectToJsonBytes(organisation)))
             .andExpect(status().isBadRequest());
 
         // Validate the Organisation in the database
@@ -1021,28 +1007,5 @@ public class OrganisationResourceExtendedIntTest {
         assertThat(organisation1).isNotEqualTo(organisation2);
         organisation1.setId(null);
         assertThat(organisation1).isNotEqualTo(organisation2);
-    }
-
-    @Test
-    @Transactional
-    public void dtoEqualsVerifier() throws Exception {
-        TestUtil.equalsVerifier(OrganisationDTO.class);
-        OrganisationDTO organisationDTO1 = new OrganisationDTO();
-        organisationDTO1.setId(1L);
-        OrganisationDTO organisationDTO2 = new OrganisationDTO();
-        assertThat(organisationDTO1).isNotEqualTo(organisationDTO2);
-        organisationDTO2.setId(organisationDTO1.getId());
-        assertThat(organisationDTO1).isEqualTo(organisationDTO2);
-        organisationDTO2.setId(2L);
-        assertThat(organisationDTO1).isNotEqualTo(organisationDTO2);
-        organisationDTO1.setId(null);
-        assertThat(organisationDTO1).isNotEqualTo(organisationDTO2);
-    }
-
-    @Test
-    @Transactional
-    public void testEntityFromId() {
-        assertThat(organisationMapper.fromId(42L).getId()).isEqualTo(42);
-        assertThat(organisationMapper.fromId(null)).isNull();
     }
 }
