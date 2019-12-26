@@ -21,7 +21,7 @@
     </modules>
 
     <properties>
-        <version.java>1.8</version.java>
+        <version.java>11</version.java>
         <version.junit>4.12</version.junit>
         <!--Java EE-->
         <version.javaee7>7.0</version.javaee7>
@@ -51,6 +51,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.release>${version.java}</maven.compiler.release>
     </properties>
 
     <dependencyManagement>
