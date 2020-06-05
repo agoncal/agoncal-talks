@@ -9,32 +9,32 @@ EMAIL_MIN_LENGTH = 5
 URL_MAX_LENGTH = 256
 
 entity Contact (spn_contact) {
-    firstName String required maxlength(NAME_MAX_LENGTH),
-    lastName String required maxlength(NAME_MAX_LENGTH),
-    activated Boolean,
-    email String required minlength(EMAIL_MIN_LENGTH) maxlength(EMAIL_MAX_LENGTH),
-    phoneArea String,
+    firstName String required maxlength(NAME_MAX_LENGTH)
+    lastName String required maxlength(NAME_MAX_LENGTH)
+    activated Boolean
+    email String required minlength(EMAIL_MIN_LENGTH) maxlength(EMAIL_MAX_LENGTH)
+    phoneArea String
     phoneNumber String
 }
 
 entity Occupation (spn_occupation) {
-    category String required maxlength(NAME_MAX_LENGTH),
-    name String required maxlength(NAME_MAX_LENGTH),
+    category String required maxlength(NAME_MAX_LENGTH)
+    name String required maxlength(NAME_MAX_LENGTH)
 }
 
 entity Organisation (spn_organisation) {
-    slug String required minlength(SLUG_MIN_LENGTH) maxlength(SLUG_MAX_LENGTH),
-    name String required maxlength(NAME_MAX_LENGTH),
-    description String maxlength(DESCRIPTION_MAX_LENGTH),
-    businessIdentification String,
-    corporateName String,
-    domainName String,
-    phoneArea String,
+    slug String required minlength(SLUG_MIN_LENGTH) maxlength(SLUG_MAX_LENGTH)
+    name String required maxlength(NAME_MAX_LENGTH)
+    description String maxlength(DESCRIPTION_MAX_LENGTH)
+    businessIdentification String
+    corporateName String
+    domainName String
+    phoneArea String
     phoneNumber String
-    vatIdentification String,
-    webSite String,
-    additionalInformation String,
-    activated Boolean,
+    vatIdentification String
+    webSite String
+    additionalInformation String
+    activated Boolean
     createdOn Instant
 }
 
@@ -43,11 +43,11 @@ entity IndustrySector (spn_industry_sector) {
 }
 
 entity Address (spn_address) {
-    street String,
-    street2 String,
-    city String,
-    state String,
-    zipCode String,
+    street String
+    street2 String
+    city String
+    state String
+    zipCode String
     additionalInformation String
 }
 
@@ -59,19 +59,19 @@ entity Address (spn_address) {
 * tld  top-level domains
 */
 entity Country (spn_country) {
-    iso2 String required maxlength(2),
-    iso3 String required maxlength(3),
-    m49 Integer required,
-    name String required,
-    officialNameEn String,
-    officialNameFr String,
-    dial String maxlength(5),
-    continent Continent required,
-    tld String maxlength(3),
-    flag32	String,
-    flag128 String,
-    latitude String,
-    longitude String,
+    iso2 String required maxlength(2)
+    iso3 String required maxlength(3)
+    m49 Integer required
+    name String required
+    officialNameEn String
+    officialNameFr String
+    dial String maxlength(5)
+    continent Continent required
+    tld String maxlength(3)
+    flag32	String
+    flag128 String
+    latitude String
+    longitude String
     zoom Integer
 }
 
@@ -80,11 +80,11 @@ enum Continent {
 }
 
 entity Language (spn_language) {
-    alpha3b String required maxlength(3),
+    alpha3b String required maxlength(3)
     alpha2 String required maxlength(2)
-    name String required,
-    flag32	String,
-    flag128 String,
+    name String required
+    flag32	String
+    flag128 String
     activated Boolean
 }
 
@@ -98,9 +98,9 @@ relationship OneToMany {
 }
 
 relationship ManyToOne {
-    Contact{occupation(name)} to Occupation,
-	Organisation{industrySector(name)} to IndustrySector,
-	Address{country(name)} to Country,
+    Contact{occupation(name)} to Occupation
+	Organisation{industrySector(name)} to IndustrySector
+	Address{country(name)} to Country
     Contact{language(name) required} to Language
 }
 
