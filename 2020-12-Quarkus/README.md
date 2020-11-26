@@ -1,5 +1,9 @@
 # Quarkus Micro Services 
 
+## Setup
+
+* Create a directory with the three `bootstrap*` scripts, README, pom.xml and infrastructure directory
+
 ## Demo 01 - Book
 
 ### Bootstrap
@@ -86,6 +90,15 @@
 * Exception, look for `Unable to determine the proper baseUrl/baseUri`
 * Add `org.agoncal.talk.quarkus.book.NumberProxy/mp-rest/url=http://localhost:8701`
 
+### Mock the proxy
+
+* `mvn test` fails
+* In `src/test` generate new class `MockNumberProxy`
+* Implements `NumberProxy` and implement the method `generateISBN`
+* `return "mock isbn";`
+* Add `@Mock @RestClient`
+* `mvn test` succeeds
+
 ## Demo 04 - Fallback
 
 ### Kill Number 
@@ -101,7 +114,7 @@
 * Change isbn to `book.isbn = "needs to be set later";`
 * Add `@Fallback(fallbackMethod = "fallbackOnCreateAQuarkusBook")`
 
-## Demo 05 - Send the book to Kafka
+## Demo 05 - Kafka
 
 ### Send the book to a channel 
 
@@ -139,3 +152,9 @@ public void bookToBeCreatedLater(String book) {
 ### Configure the channel
 
 * Copy the conf in `application.properties` change `outgoing` with `incoming`, `serializer` with `deserializer` and `StringSerializer` with `StringDeserializer`
+
+### Start and Kill the Number microservice 
+
+## Demo 06 - Packaging
+
+### Package
