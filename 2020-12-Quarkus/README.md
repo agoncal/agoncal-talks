@@ -2,7 +2,8 @@
 
 ## Setup
 
-* Create a directory with the three `bootstrap*` scripts, README, pom.xml and infrastructure directory
+* Create a directory with the three `bootstrap*` scripts, `README`, `pom.xml` and `infrastructure` directory
+* Remove previous Docker image `docker image ls | grep agoncal` and `docker image rm <sha1>` for `agoncal/number`
 
 ## Demo 01 - Book
 
@@ -158,3 +159,32 @@ public void bookToBeCreatedLater(String book) {
 ## Demo 06 - Packaging
 
 ### Package
+
+* `mvn clean package`
+* `ll target` show size of the jar and `tree target/lib`
+* Execute the runner `java -jar target/number-1.0-SNAPSHOT-runner.jar`
+* Uber Jar `mvn clean package -Dquarkus.package.type=uber-jar`
+* `ll target` show size of the jar no more `lib`
+
+### Native Executable
+
+* `mvn clean package -Dquarkus.package.type=native`
+* `ll target` show size of the executable
+* `./target/number-1.0-SNAPSHOT-runner`
+* `curl http://localhost:8701/api/numbers`
+
+### Native Linux Executable
+
+* `mvn clean package -Dquarkus.package.type=native -Dquarkus.native.container-build=true`
+* `ll target` show size of the executable
+* `./target/number-1.0-SNAPSHOT-runner`
+* could not be run by the operating system
+
+### Docker
+
+* Add Docker extension `mvn quarkus:add-extension -Dextensions="container-image-docker"`
+* `mvn clean package -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true`
+* Show the `Dockerfile.native` file
+* `docker image ls | grep agoncal`
+* Execute `docker container run -i --rm -p 8701:8701 agoncal/number:1.0-SNAPSHOT`
+* `curl http://localhost:8701/api/numbers`
