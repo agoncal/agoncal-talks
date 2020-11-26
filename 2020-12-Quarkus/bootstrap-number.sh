@@ -10,6 +10,4 @@ mvn io.quarkus:quarkus-maven-plugin:1.10.1.Final:create \
 
 cd number
 
-mvn quarkus:add-extension -Dextensions="smallrye-openapi"
-
 mvn quarkus:add-extension -Dextensions="container-image-docker"

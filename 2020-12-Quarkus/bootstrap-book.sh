@@ -10,12 +10,12 @@ mvn io.quarkus:quarkus-maven-plugin:1.10.1.Final:create \
 
 cd book
 
-./mvnw quarkus:add-extension -Dextensions="smallrye-openapi"
+mvn quarkus:add-extension -Dextensions="smallrye-openapi"
 
-./mvnw quarkus:add-extension -Dextensions="rest-client"
+mvn quarkus:add-extension -Dextensions="rest-client"
 
-./mvnw quarkus:add-extension -Dextensions="smallrye-fault-tolerance"
+mvn quarkus:add-extension -Dextensions="smallrye-fault-tolerance"
 
-./mvnw quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"
+mvn quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"
 
-./mvnw quarkus:add-extension -Dextensions="container-image-docker"
+mvn quarkus:add-extension -Dextensions="container-image-docker"

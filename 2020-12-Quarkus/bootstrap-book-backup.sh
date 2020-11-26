@@ -8,4 +8,4 @@ mvn io.quarkus:quarkus-maven-plugin:1.10.1.Final:create \
     -Dpath="/api/books" \
     -Dextensions="resteasy, smallrye-reactive-messaging-kafka"
 
-./mvnw quarkus:add-extension -Dextensions="container-image-docker"
+mvn quarkus:add-extension -Dextensions="container-image-docker"

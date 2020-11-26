@@ -85,3 +85,40 @@
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books -v`
 * Exception, look for `Unable to determine the proper baseUrl/baseUri`
 * Add `org.agoncal.talk.quarkus.book.NumberProxy/mp-rest/url=http://localhost:8701`
+
+## Demo 04 - Fallback
+
+### Kill Number 
+
+* Kill Number
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+* Show the logs of Book
+
+### Add Fallback 
+
+* Add fallback extension `mvn quarkus:add-extension -Dextensions="smallrye-fault-tolerance"`
+* In `BookResource` copy/paste the metho `createAQuarkusBook` and change the name to `fallbackOnCreateAQuarkusBook`
+* Change isbn to `book.isbn = "needs to be set later";`
+* Add `@Fallback(fallbackMethod = "fallbackOnCreateAQuarkusBook")`
+
+## Demo 05 - Send the book to Kafka
+
+### Send the book to a channel 
+
+* Add Kafka extension `mvn quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"`
+* Add the channel `@Inject @Channel("failed-book") Emitter<String> failedBook;`
+* In `fallbackOnCreateAQuarkusBook` add `failedBook.send(book.toString());`
+* Generate a `toString()` in `Book`
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+* Exception look for `No subscriber found for the channel failed-book`
+
+### Configure the channel
+
+* Add the configuration
+```
+mp.messaging.incoming.failed-book.connector=smallrye-kafka
+mp.messaging.incoming.failed-book.topic=po-write
+mp.messaging.incoming.failed-book.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+```
+* Logs on Book `could not be established. Broker may not be available`
+ 
