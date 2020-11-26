@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.time.Instant;
 
 @Path("/api/books")
 public class BookResource {
@@ -19,7 +20,7 @@ public class BookResource {
     NumberProxy proxy;
 
     @Inject
-    @Channel("failed-book")
+    @Channel("failed-books")
     Emitter<String> failedBook;
 
     /**
@@ -28,20 +29,22 @@ public class BookResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
-    @Fallback(fallbackMethod = "fallbackOnCreateAQuarkusBook")
+    @Fallback(fallbackMethod = "fallbackCreateAQuarkusBook")
     public Book createAQuarkusBook(String title) {
         Book book = new Book();
         book.title = title;
         book.topic = "Quarkus";
         book.isbn = proxy.generateISBN();
+        System.out.println("### Book created " + book);
         return book;
     }
 
-    public Book fallbackOnCreateAQuarkusBook(String title) {
+    public Book fallbackCreateAQuarkusBook(String title) {
         Book book = new Book();
         book.title = title;
         book.topic = "Quarkus";
-        book.isbn = "needs to be set later";
+        book.isbn = "needs to be set later as the Number microservices is down";
+        System.out.println(">>> Book created later " + book);
         failedBook.send(book.toString());
         return book;
     }
@@ -49,6 +52,7 @@ public class BookResource {
     public class Book {
         public String title;
         public String topic;
+        public Instant createdAt = Instant.now();
         public String isbn;
 
         @Override
@@ -56,6 +60,7 @@ public class BookResource {
             return "Book{" +
                 "title='" + title + '\'' +
                 ", topic='" + topic + '\'' +
+                ", createdAt=" + createdAt +
                 ", isbn='" + isbn + '\'' +
                 '}';
         }

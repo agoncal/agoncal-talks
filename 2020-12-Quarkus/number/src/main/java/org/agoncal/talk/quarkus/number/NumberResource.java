@@ -12,6 +12,8 @@ public class NumberResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String generateISBN() {
-        return "13-" + new Random().nextInt(100_000_000);
+        String number = "13-" + new Random().nextInt(100_000_000);
+        System.out.println("### " + number);
+        return number;
     }
 }

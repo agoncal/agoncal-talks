@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.hasKey;
 public class BookResourceTest {
 
     @Test
-    public void shouldCreateABook() {
+    public void shouldCreateAQuarkusBook() {
         given()
             .body("title of the book").
         when()
@@ -20,6 +20,7 @@ public class BookResourceTest {
             .statusCode(200)
             .body("title", is("title of the book"))
             .body("topic", is("Quarkus"))
+            .body("$", hasKey("createdAt"))
             .body("$", hasKey("isbn"));
     }
 }

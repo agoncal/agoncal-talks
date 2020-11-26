@@ -2,9 +2,29 @@
 
 ## Setup
 
-* Create a directory with the three `bootstrap*` scripts, `README`, `pom.xml` and `infrastructure` directory
-* Remove the `<modules>` in `pom.xml`
+* Print this doc with BBEdit
+* Make sure batteries are charged (keyboard, trackpad, etc.)
+* Phone on mute
+* Stop WhatsApp, Slack, Skype, etc.
+* Bigger mouser pointer: Preferences -> Accesibility -> Display -> Cursor (to middle)
 * Remove previous Docker image `docker image ls | grep agoncal` and `docker image rm <sha1>` for `agoncal/number`
+* Open an Araxis Merge with both project code so I can compare
+
+### Intellij IDEA
+
+* In `$CODE_HOME/temp` remove everything `rm -rf *` and `mkdir microservices`
+* Copy the structure with `cp -R $CODE_HOME/Agoncal/agoncal-talks/2020-12-Quarkus/ microservices`
+* Remove `rm -rf .idea/ book/ book-fallback/ number/ microservices.iml`
+* Remove the `<modules>` in `pom.xml`
+* Open the project in Intellij
+* Switch to `Bigger` in `Editor -> Color Scheme`
+
+### Terminal
+
+* Switch to `Presentation` profile
+* iTerm2 create 4 terminal
+* Each terminal type `CMD+I` the name of the tab (in order Book, Number, Backup) and `ESC`
+* `cd $CODE_HOME/Temp/microservices` in each tab
 
 ## Demo 01 - Book
 
@@ -12,7 +32,6 @@
 
 * Execute `bootstrap-book.sh`
 * `curl http://localhost:8080/api/books`
-* `mvn test`
 
 ### Configure Listening Port
 
@@ -22,11 +41,26 @@
 ### Change code
 
 * In `BookResource` rename the `hello` method in `Book createAQuarkusBook(String title)`
-* Cgange `@GET` to `@POST` and `@Produces(MediaType.APPLICATION_JSON)` 
-* In `BookResource` create an inner class `public class Book { public String title; public String topic; }`
+* Change `@GET` to `@POST` and `@Produces(MediaType.APPLICATION_JSON)` 
 * It consumes TEXT `@Consumes(MediaType.TEXT_PLAIN)`
-* Add to the body of the method `Book book = new Book(); book.title = title; return book;`
-* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books -v`
+* In `BookResource` create an inner class
+```
+public class Book { 
+  public String title; 
+  public String topic; 
+  public Instant createdAt = Instant.now();
+}
+```
+* Add to the body of the method
+```
+    Book book = new Book();
+    book.title = title;
+    book.topic = "Quarkus";
+    System.out.println("### Book created " + book);
+    return book;
+```
+
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 
 ### Swagger UI
 
@@ -37,17 +71,22 @@
 
 ### Change test
 
-* Rename `testHelloEndpoint` in `shouldCreateABook`
-* Change the `given` to `given().body("title of the book", ObjectMapperType.JSONB)`
+* Rename `testHelloEndpoint` in `shouldCreateAQuarkusBook`
+* Change the `given` to `given().body("title of the book")`
 * Change the `when` from a `get` to `.post("/api/books").`
-* Change the body `.body("title", is("title of the book")).body("topic", is("Quarkus"));`
+* Change the body 
+```
+    .body("title", is("title of the book"))
+    .body("topic", is("Quarkus"))
+    .body("$", hasKey("createdAt"));
+```
 
 ### Add ISBN
 
-* In `Book` add `public String isbn;`
 * Change test and add `.body("$", hasKey("isbn"));`
 * `mvn test` fail
-* Go back to `createAQuarkusBook` and add `book.isbn = "We need to invoke a microservice";`
+* In `Book` add `public String isbn;`
+* In `createAQuarkusBook` and add `book.isbn = "We need to invoke a microservice";`
 * `mvn test` pass
 
 ## Demo 02 - Number
@@ -59,22 +98,25 @@
 ### Configure Listening Port
 
 * Change listening port `quarkus.http.port=8701`
-* `curl http://localhost:8701/api/numbers`
-* `mvn test`
 
 ### Change code
 
 * In `NumberResource` rename the `hello` method in `generateISBN`
-* Change the `return` statement to `return "13-" + new Random().nextInt(100_000_000);`
-* Change listening port `quarkus.http.port=8701`
-* `curl http://localhost:8701/api/numbers`
+* Change the body
+```
+    String number = "13-" + new Random().nextInt(100_000_000);
+    System.out.println("### " + number);
+    return number;
+```
 * Change the `NumberResourceTest` to test `.body(startsWith("13-"));`
 * `mvn test`
+* `curl http://localhost:8701/api/numbers`
 
 ## Demo 03 - Rest Client
 
 ### Create the Proxy
 
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * Add the REST Client extension in Book `mvn quarkus:add-extension -Dextensions="rest-client"`
 * Show `pom.xml`
 * Copy `NumberResource` and rename it to `NumberProxy`
@@ -94,6 +136,8 @@
 
 ### Mock the proxy
 
+* `mvn test` pass
+* Kill Number
 * `mvn test` fails
 * In `src/test` generate new class `MockNumberProxy`
 * Implements `NumberProxy` and implement the method `generateISBN`
@@ -113,43 +157,45 @@
 
 * Add fallback extension `mvn quarkus:add-extension -Dextensions="smallrye-fault-tolerance"`
 * In `BookResource` copy/paste the metho `createAQuarkusBook` and change the name to `fallbackOnCreateAQuarkusBook`
-* Change isbn to `book.isbn = "needs to be set later";`
+* Change isbn to `book.isbn = "needs to be set later as the Number microservices is down"`
 * Add `@Fallback(fallbackMethod = "fallbackOnCreateAQuarkusBook")`
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+* Start Number, curl, Kill Number, curl
 
 ## Demo 05 - Kafka
 
 ### Send the book to a channel 
 
 * Add Kafka extension `mvn quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"`
-* Add the channel `@Inject @Channel("failed-book") Emitter<String> failedBook;`
+* Add the channel `@Inject @Channel("failed-books") Emitter<String> failedBook;`
 * In `fallbackOnCreateAQuarkusBook` add `failedBook.send(book.toString());`
 * Generate a `toString()` in `Book`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
-* Exception look for `No subscriber found for the channel failed-book`
+* Exception look for `No subscriber found for the channel failed-books`
 
 ### Configure the channel
 
 * Add the configuration
 ```
-mp.messaging.outgoing.failed-book.connector=smallrye-kafka
-mp.messaging.outgoing.failed-book.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+mp.messaging.outgoing.failed-books.connector=smallrye-kafka
+mp.messaging.outgoing.failed-books.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 ```
 * Logs on Book `could not be established. Broker may not be available`
 * Start Kafka `docker-compose -f infrastructure/docker-compose.yaml up -d`
 * Logs have stopped 
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 
-### Create the Book Backup
+### Create the Book Fallback
 
 * Execute `bootstrap-book.sh`
 * In `BookFallbackSubscriber` remove the `@Path` and add the following method
 ```
-@Incoming("failed-book")
+@Incoming("failed-books")
 public void bookToBeCreatedLater(String book) {
-    System.out.println("### Invalid book needs to be created later");
-    System.out.println(book);
+    System.out.println("### " + book);
 }
 ```
+* Make sure the method returns `void`
 
 ### Configure the channel
 
