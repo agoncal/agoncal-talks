@@ -67,5 +67,21 @@
 
 ## Demo 03 - Rest Client
 
+### Create the Proxy
+
 * Add the REST Client extension in Book `mvn quarkus:add-extension -Dextensions="rest-client"`
 * Show `pom.xml`
+* Copy `NumberResource` and rename it to `NumberProxy`
+* Change `NumberProxy` to an interface, empty the `generateISBN` method
+* Add `@RegisterRestClient` to the interface
+
+### Use the Proxy
+
+* In `BookResource` add `@RestClient NumberProxy proxy;`
+* Change the code to  `book.isbn = proxy.generateISBN();`
+
+### Configure the proxy
+
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books -v`
+* Exception, look for `Unable to determine the proper baseUrl/baseUri`
+* Add `org.agoncal.talk.quarkus.book.NumberProxy/mp-rest/url=http://localhost:8701`
