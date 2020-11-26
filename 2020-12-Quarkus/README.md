@@ -3,6 +3,7 @@
 ## Setup
 
 * Create a directory with the three `bootstrap*` scripts, `README`, `pom.xml` and `infrastructure` directory
+* Remove the `<modules>` in `pom.xml`
 * Remove previous Docker image `docker image ls | grep agoncal` and `docker image rm <sha1>` for `agoncal/number`
 
 ## Demo 01 - Book
