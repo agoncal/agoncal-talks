@@ -8,4 +8,8 @@ mvn io.quarkus:quarkus-maven-plugin:1.10.1.Final:create \
     -Dpath="/api/numbers" \
     -Dextensions="resteasy"
 
-./mvnw quarkus:add-extension -Dextensions="container-image-docker"
+cd number
+
+mvn quarkus:add-extension -Dextensions="smallrye-openapi"
+
+mvn quarkus:add-extension -Dextensions="container-image-docker"

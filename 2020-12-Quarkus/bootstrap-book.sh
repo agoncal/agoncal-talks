@@ -6,7 +6,11 @@ mvn io.quarkus:quarkus-maven-plugin:1.10.1.Final:create \
     -DprojectVersion=1.0-SNAPSHOT \
     -DclassName="org.agoncal.talk.quarkus.book.BookResource" \
     -Dpath="/api/books" \
-    -Dextensions="resteasy, resteasy-jsonb, smallrye-openapi"
+    -Dextensions="resteasy, resteasy-jsonb"
+
+cd book
+
+./mvnw quarkus:add-extension -Dextensions="smallrye-openapi"
 
 ./mvnw quarkus:add-extension -Dextensions="rest-client"
 
