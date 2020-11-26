@@ -10,5 +10,6 @@
   <modules>
     <module>number</module>
     <module>book</module>
+    <module>book-fallback</module>
   </modules>
 </project>

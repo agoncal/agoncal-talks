@@ -116,9 +116,26 @@
 
 * Add the configuration
 ```
-mp.messaging.incoming.failed-book.connector=smallrye-kafka
-mp.messaging.incoming.failed-book.topic=po-write
-mp.messaging.incoming.failed-book.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+mp.messaging.outgoing.failed-book.connector=smallrye-kafka
+mp.messaging.outgoing.failed-book.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 ```
 * Logs on Book `could not be established. Broker may not be available`
- 
+* Start Kafka `docker-compose -f infrastructure/docker-compose.yaml up -d`
+* Logs have stopped 
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+
+### Create the Book Backup
+
+* Execute `bootstrap-book.sh`
+* In `BookFallbackSubscriber` remove the `@Path` and add the following method
+```
+@Incoming("failed-book")
+public void bookToBeCreatedLater(String book) {
+    System.out.println("### Invalid book needs to be created later");
+    System.out.println(book);
+}
+```
+
+### Configure the channel
+
+* Copy the conf in `application.properties` change `outgoing` with `incoming`, `serializer` with `deserializer` and `StringSerializer` with `StringDeserializer`
