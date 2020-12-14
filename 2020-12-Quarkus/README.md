@@ -14,7 +14,8 @@
 
 * In `$CODE_HOME/temp` remove everything `rm -rf *` and `mkdir microservices`
 * Copy the structure with `cp -R $CODE_HOME/Agoncal/agoncal-talks/2020-12-Quarkus/ microservices`
-* Remove `rm -rf .idea/ book/ book-fallback/ number/ microservices.iml`
+* Copy .gitignore `cp $CODE_HOME/Agoncal/agoncal-talks/.gitignore microservices`
+* Clean with `mvn clean` and then remove `rm -rf .idea/ book/ book-fallback/ number/ microservices.iml`
 * Remove the `<modules>` in `pom.xml`
 * Open the project in Intellij
 * Switch to `Bigger` in `Editor -> Color Scheme`
@@ -26,15 +27,17 @@
 * Each terminal type `CMD+I` the name of the tab (in order Book, Number, Backup) and `ESC`
 * `cd $CODE_HOME/Temp/microservices` in each tab
 
+### Add to Git
+
+* `microservices$ git init`
+* `microservices$ git add .`
+* `microservices$ git commit -am "init"`
+
 ## Demo 01 - Book
 
-### Bootstrap
+### Bootstrap and Configure Listening Port
 
 * Execute `bootstrap-book.sh`
-* `curl http://localhost:8080/api/books`
-
-### Configure Listening Port
-
 * Change listening port `quarkus.http.port=8702`
 * `curl http://localhost:8702/api/books`
 
@@ -48,21 +51,24 @@
 public class Book { 
   public String title; 
   public String topic; 
+  public String isbn;
   public Instant createdAt = Instant.now();
 }
 ```
+* Generate `toString()` method
 * Add to the body of the method
 ```
     Book book = new Book();
     book.title = title;
     book.topic = "Quarkus";
+    book.isbn = "We need to invoke a microservice";
     System.out.println("### Book created " + book);
     return book;
 ```
 
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 
-### Swagger UI
+### OpenAPI and Swagger UI
 
 * Go to http://localhost:8702/swagger-ui Swagger UI is not there
 * Without stopping Quarkus `mvn quarkus:add-extension -Dextensions="smallrye-openapi"`
@@ -78,26 +84,17 @@ public class Book {
 ```
     .body("title", is("title of the book"))
     .body("topic", is("Quarkus"))
+    .body("$", hasKey("isbn"))
     .body("$", hasKey("createdAt"));
 ```
 
-### Add ISBN
-
-* Change test and add `.body("$", hasKey("isbn"));`
-* `mvn test` fail
-* In `Book` add `public String isbn;`
-* In `createAQuarkusBook` and add `book.isbn = "We need to invoke a microservice";`
-* `mvn test` pass
-
 ## Demo 02 - Number
 
-### Bootstrap
+### Bootstrap and Configure Listening Port
 
 * Execute `bootstrap-number.sh`
-
-### Configure Listening Port
-
 * Change listening port `quarkus.http.port=8701`
+* `curl http://localhost:8701/api/numbers`
 
 ### Change code
 
@@ -108,6 +105,7 @@ public class Book {
     System.out.println("### " + number);
     return number;
 ```
+* Rename test method `hell`to `shouldGenerateISBN`
 * Change the `NumberResourceTest` to test `.body(startsWith("13-"));`
 * `mvn test`
 * `curl http://localhost:8701/api/numbers`
@@ -158,6 +156,7 @@ public class Book {
 * Add fallback extension `mvn quarkus:add-extension -Dextensions="smallrye-fault-tolerance"`
 * In `BookResource` copy/paste the metho `createAQuarkusBook` and change the name to `fallbackOnCreateAQuarkusBook`
 * Change isbn to `book.isbn = "needs to be set later as the Number microservices is down"`
+* Change `System.out.println("### FallBack !!! Book will be created " + book);`
 * Add `@Fallback(fallbackMethod = "fallbackOnCreateAQuarkusBook")`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * Start Number, curl, Kill Number, curl
@@ -169,7 +168,6 @@ public class Book {
 * Add Kafka extension `mvn quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"`
 * Add the channel `@Inject @Channel("failed-books") Emitter<String> failedBook;`
 * In `fallbackOnCreateAQuarkusBook` add `failedBook.send(book.toString());`
-* Generate a `toString()` in `Book`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * Exception look for `No subscriber found for the channel failed-books`
 
@@ -188,11 +186,12 @@ mp.messaging.outgoing.failed-books.value.serializer=org.apache.kafka.common.seri
 ### Create the Book Fallback
 
 * Execute `bootstrap-book.sh`
-* In `BookFallbackSubscriber` remove the `@Path` and add the following method
+* In `BookFallbackSubscriber` remove the `@Path`, `@GET`, `@Produces`
+* Rename `hello` with `bookToBeCreatedLater` 
 ```
 @Incoming("failed-books")
 public void bookToBeCreatedLater(String book) {
-    System.out.println("### " + book);
+    System.out.println("### Book to be created later" + book);
 }
 ```
 * Make sure the method returns `void`
@@ -207,6 +206,7 @@ public void bookToBeCreatedLater(String book) {
 
 ### Package
 
+* In Number
 * `mvn clean package`
 * `ll target` show size of the jar and `tree target/lib`
 * Execute the runner `java -jar target/number-1.0-SNAPSHOT-runner.jar`
