@@ -9,6 +9,7 @@
 * Bigger mouser pointer: Preferences -> Accesibility -> Display -> Cursor (to middle)
 * Remove previous Docker image `docker image ls | grep agoncal` and `docker image rm <sha1>` for `agoncal/number`
 * Open an Araxis Merge with both project code so I can compare
+* Start Docker
 
 ### Intellij IDEA
 
@@ -44,8 +45,9 @@
 ### Change code
 
 * In `BookResource` rename the `hello` method in `Book createAQuarkusBook(String title)`
-* Change `@GET` to `@POST` and `@Produces(MediaType.APPLICATION_JSON)` 
+* Change `@GET` to `@POST` 
 * It consumes TEXT `@Consumes(MediaType.TEXT_PLAIN)`
+* And consumes JSON `@Produces(MediaType.APPLICATION_JSON)` 
 * In `BookResource` create an inner class
 ```
 public class Book { 
@@ -102,7 +104,7 @@ public class Book {
 * Change the body
 ```
     String number = "13-" + new Random().nextInt(100_000_000);
-    System.out.println("### " + number);
+    System.out.println("### ISBN " + number);
     return number;
 ```
 * Rename test method `hell`to `shouldGenerateISBN`
@@ -168,8 +170,6 @@ public class Book {
 * Add Kafka extension `mvn quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"`
 * Add the channel `@Inject @Channel("failed-books") Emitter<String> failedBook;`
 * In `fallbackOnCreateAQuarkusBook` add `failedBook.send(book.toString());`
-* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
-* Exception look for `No subscriber found for the channel failed-books`
 
 ### Configure the channel
 
@@ -180,6 +180,7 @@ mp.messaging.outgoing.failed-books.value.serializer=org.apache.kafka.common.seri
 ```
 * Logs on Book `could not be established. Broker may not be available`
 * Start Kafka `docker-compose -f infrastructure/docker-compose.yaml up -d`
+* Check Kafka ` docker container ls`
 * Logs have stopped 
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 
@@ -199,6 +200,12 @@ public void bookToBeCreatedLater(String book) {
 ### Configure the channel
 
 * Copy the conf in `application.properties` change `outgoing` with `incoming`, `serializer` with `deserializer` and `StringSerializer` with `StringDeserializer`
+``` 
+mp.messaging.incoming.failed-books.connector=smallrye-kafka
+mp.messaging.incoming.failed-books.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+```
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+
 
 ### Start and Kill the Number microservice 
 
@@ -216,6 +223,7 @@ public void bookToBeCreatedLater(String book) {
 ### Native Executable
 
 * `mvn clean package -Dquarkus.package.type=native`
+* While it compile, execute `loop.sh` 
 * `ll target` show size of the executable
 * `./target/number-1.0-SNAPSHOT-runner`
 * `curl http://localhost:8701/api/numbers`
@@ -229,8 +237,9 @@ public void bookToBeCreatedLater(String book) {
 
 ### Docker
 
+* `docker image ls | grep agoncal`
 * Add Docker extension `mvn quarkus:add-extension -Dextensions="container-image-docker"`
-* `mvn clean package -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true`
+* `mvn package -Dquarkus.container-image.build=true`
 * Show the `Dockerfile.native` file
 * `docker image ls | grep agoncal`
 * Execute `docker container run -i --rm -p 8701:8701 agoncal/number:1.0-SNAPSHOT`
