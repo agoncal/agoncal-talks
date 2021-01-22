@@ -4,6 +4,7 @@ import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -15,6 +16,9 @@ import java.time.Instant;
 
 @Path("/api/books")
 public class BookResource {
+
+    @Inject
+    Logger logger;
 
     @RestClient
     NumberProxy proxy;
@@ -29,22 +33,22 @@ public class BookResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
-    @Fallback(fallbackMethod = "fallbackCreateAQuarkusBook")
+    @Fallback(fallbackMethod = "fallbackOnCreateAQuarkusBook")
     public Book createAQuarkusBook(String title) {
         Book book = new Book();
         book.title = title;
         book.topic = "Quarkus";
         book.isbn = proxy.generateISBN();
-        System.out.println("### Book created " + book);
+        logger.info("### Book created " + book);
         return book;
     }
 
-    public Book fallbackCreateAQuarkusBook(String title) {
+    public Book fallbackOnCreateAQuarkusBook(String title) {
         Book book = new Book();
         book.title = title;
         book.topic = "Quarkus";
         book.isbn = "needs to be set later as the Number microservices is down";
-        System.out.println(">>> Book created later " + book);
+        logger.warn("### FallBack !!! Book will be created later " + book);
         failedBook.send(book.toString());
         return book;
     }
