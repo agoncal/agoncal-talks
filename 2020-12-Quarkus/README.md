@@ -23,6 +23,12 @@
 * Make sure containers are stopped `docker-compose -f infrastructure/kafka.yaml down`
 * Make sure to remove images `docker image ls | grep agoncal`
 
+### Add to Git
+
+* `microservices$ git init`
+* `microservices$ git add .`
+* `microservices$ git commit -am "init"`
+
 ### Intellij IDEA
 
 * Open the project in Intellij
@@ -31,23 +37,17 @@
 ### Terminal
 
 * Switch to `Presentation` profile
-* iTerm2 create 4 terminal
-* Each terminal type `CMD+I` the name of the tab (in order Book, Number, Backup) and `ESC`
+* Split the terminal into 4 
 * `cd $CODE_HOME/Temp/microservices` in each tab
-
-### Add to Git
-
-* `microservices$ git init`
-* `microservices$ git add .`
-* `microservices$ git commit -am "init"`
 
 ## Demo 01 - Book
 
 ### Bootstrap and Configure Listening Port
 
-* Execute `bootstrap-book.sh`
-* Change listening port `quarkus.http.port=8702`
+* Execute `./bootstrap-book.sh`
 * Show code
+* Change listening port `quarkus.http.port=8702`
+* `mvn quarkus:dev`  
 * `curl http://localhost:8702/api/books`
 
 ### Change code
@@ -57,6 +57,7 @@
 * It consumes TEXT `@Consumes(MediaType.TEXT_PLAIN)`
 * And consumes JSON `@Produces(MediaType.APPLICATION_JSON)` 
 * In `BookResource` create an inner class
+* Use `pst` live template in Intellij for `public String`
 ```
 public class Book { 
   public String title; 
@@ -81,7 +82,7 @@ public class Book {
   @Inject
   Logger logger;
 ```
-* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books -v | jq`
 
 ### OpenAPI and Swagger UI
 
@@ -92,6 +93,7 @@ public class Book {
 
 ### Change test
 
+* Split editor in 2
 * Rename `testHelloEndpoint` in `shouldCreateAQuarkusBook`
 * Change the `given` to `given().body("title of the book")`
 * Change the `when` from a `get` to `.post("/api/books").`
@@ -102,20 +104,23 @@ public class Book {
     .body("$", hasKey("isbn"))
     .body("$", hasKey("createdAt"));
 ```
+* `mvn test`
 
 ### Git
 
+* From the root `microservices` directory
 ```
-$ git add .
-$ git commit -am "book"
+microservices$ git add .
+microservices$ git commit -am "book"
 ```
 
 ## Demo 02 - Number
 
 ### Bootstrap and Configure Listening Port
 
-* Execute `bootstrap-number.sh`
+* Execute `./bootstrap-number.sh`
 * Change listening port `quarkus.http.port=8701`
+* `mvn quarkus:dev`  
 * `curl http://localhost:8701/api/numbers`
 
 ### Change code
@@ -132,7 +137,7 @@ $ git commit -am "book"
     logger.info("### ISBN " + number);
     return number;
 ```
-* Rename test method `hell`to `shouldGenerateISBN`
+* Rename test method `hello` to `shouldGenerateISBN`
 * Change the `NumberResourceTest` to test `.body(startsWith("13-"));`
 * `mvn test`
 * `curl http://localhost:8701/api/numbers`
@@ -224,6 +229,8 @@ $ git commit -am "fallback"
 mp.messaging.outgoing.failed-books.connector=smallrye-kafka
 mp.messaging.outgoing.failed-books.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 ```
+
+/!\ skip if no time /!\
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * Logs on Book `could not be established. Broker may not be available`
 * Start Kafka `docker-compose -f infrastructure/kafka.yaml up -d`
@@ -233,13 +240,13 @@ mp.messaging.outgoing.failed-books.value.serializer=org.apache.kafka.common.seri
 
 ### Create the Book Fallback Subscriber
 
-* Execute `bootstrap-book-fallback.sh`
+* Execute `./bootstrap-book-fallback.sh`
 * In `BookFallbackSubscriber` remove the `@Path`, `@GET`, `@Produces`
 * Rename `hello` with `bookToBeCreatedLater` 
 ```
 @Incoming("failed-books")
 public void bookToBeCreatedLater(String book) {
-    logger.info("### Book to be created later" + book);
+    logger.info("### Book to be created later " + book);
 }
 ```
 * Make sure the method returns `void`
@@ -268,22 +275,23 @@ $ git commit -am "kafka"
 ### Package
 
 * In Number
-* `mvn clean package`
+* `mvn quarkus:dev` and show startup time  
+* `mvn clean package -Dmaven.test.skip=true`
 * `ll target` show size of the jar and `tree target/lib`
 * Execute the runner `java -jar target/number-1.0-SNAPSHOT-runner.jar`
-* Uber Jar `mvn clean package -Dquarkus.package.type=uber-jar`
+* Uber Jar `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar`
 * `ll target` show size of the jar no more `lib`
 
 ### Native Executable
 
-* `mvn clean package -Dquarkus.package.type=native`
+* `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native`
 * `ll target` show size of the executable
 * `./target/number-1.0-SNAPSHOT-runner`
 * `curl http://localhost:8701/api/numbers`
 
 ### Native Linux Executable
 
-* `mvn clean package -Dquarkus.package.type=native -Dquarkus.native.container-build=true`
+* `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true`
 * `ll target` show size of the executable
 * `./target/number-1.0-SNAPSHOT-runner`
 * could not be run by the operating system
@@ -293,7 +301,7 @@ $ git commit -am "kafka"
 * `docker image ls | grep agoncal`
 * Add Docker extension `mvn quarkus:add-extension -Dextensions="container-image-docker"`
 * Show the `Dockerfile.native` file
-* `mvn package -Dquarkus.container-image.build=true`
+* `mvn package -Dmaven.test.skip=true -Dquarkus.container-image.build=true`
 * (or `mvn clean package -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true`)  
 * `docker image ls | grep agoncal`
 * Execute `docker container run -i --rm -p 8701:8701 agoncal/number:1.0-SNAPSHOT`
