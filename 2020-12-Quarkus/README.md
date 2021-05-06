@@ -277,8 +277,8 @@ $ git commit -am "kafka"
 * In Number
 * `mvn quarkus:dev` and show startup time  
 * `mvn clean package -Dmaven.test.skip=true`
-* `ll target` show size of the jar and `tree target/lib`
-* Execute the runner `java -jar target/number-1.0-SNAPSHOT-runner.jar`
+* `ll target/quarkus-app` show size of the jar and `tree target/quarkus-app/`
+* Execute the runner ` java -jar target/quarkus-app/quarkus-run.jar`
 * Uber Jar `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar`
 * `ll target` show size of the jar no more `lib`
 
