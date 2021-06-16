@@ -16,6 +16,7 @@
 * In `$CODE_HOME/temp` remove everything `rm -rf *` and `mkdir microservices`
 * Copy the structure with `cp -R $CODE_HOME/Agoncal/agoncal-talks/2020-12-Quarkus/ microservices`
 * Copy .gitignore `cp $CODE_HOME/Agoncal/agoncal-talks/.gitignore microservices`
+* `cd microservices`  
 * Clean with `mvn clean` and then remove `rm -rf .idea/ book/ book-fallback/ number/ microservices.iml`
 * Remove the `<modules>` in `pom.xml`
 * In all the `bootstrap-*.sh` files, remove everything (`cd`, `quarkus:add-extension`) but the `quarkus-maven-plugin:create`
@@ -173,7 +174,7 @@ $ git commit -am "number"
 
 ### Mock the proxy
 
-* `mvn test` pass
+* In Book `mvn test` pass
 * Kill Number
 * `mvn test` fails
 * In `src/test` generate new class `MockNumberProxy`
@@ -289,20 +290,15 @@ $ git commit -am "kafka"
 * `./target/number-1.0-SNAPSHOT-runner`
 * `curl http://localhost:8701/api/numbers`
 
-### Native Linux Executable
-
-* `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true`
-* `ll target` show size of the executable
-* `./target/number-1.0-SNAPSHOT-runner`
-* could not be run by the operating system
-
-### Docker
+### Native Linux Executable and Docker
 
 * `docker image ls | grep agoncal`
 * Add Docker extension `mvn quarkus:add-extension -Dextensions="container-image-docker"`
 * Show the `Dockerfile.native` file
-* `mvn package -Dmaven.test.skip=true -Dquarkus.container-image.build=true`
-* (or `mvn clean package -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true`)  
+* `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true`  
+* `ll target` show size of the executable
+* `./target/number-1.0-SNAPSHOT-runner`
+* could not be run by the operating system
 * `docker image ls | grep agoncal`
 * Execute `docker container run -i --rm -p 8701:8701 agoncal/number:1.0-SNAPSHOT`
 * `curl http://localhost:8701/api/numbers`

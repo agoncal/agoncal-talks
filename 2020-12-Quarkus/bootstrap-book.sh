@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-mvn -U io.quarkus:quarkus-maven-plugin:create \
+mvn -U io.quarkus:quarkus-maven-plugin:1.13.7.Final:create \
     -DprojectGroupId=org.agoncal.talk.quarkus.microservices \
     -DprojectArtifactId=book \
     -DprojectVersion=1.0-SNAPSHOT \
