@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-mvn -U io.quarkus:quarkus-maven-plugin:1.13.7.Final:create \
+mvn -U io.quarkus:quarkus-maven-plugin:create \
     -DprojectGroupId=org.agoncal.talk.quarkus.microservices \
     -DprojectArtifactId=book \
-    -DprojectVersion=1.0-SNAPSHOT \
     -DclassName="org.agoncal.talk.quarkus.book.BookResource" \
     -Dpath="/api/books" \
     -Dextensions="resteasy, resteasy-jsonb"

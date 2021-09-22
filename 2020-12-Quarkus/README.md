@@ -57,7 +57,7 @@
 * Change `@GET` to `@POST` 
 * It consumes TEXT `@Consumes(MediaType.TEXT_PLAIN)`
 * And consumes JSON `@Produces(MediaType.APPLICATION_JSON)` 
-* In `BookResource` create an inner class
+* In `BookResource` create an inner class `Book`
 * Use `pst` live template in Intellij for `public String`
 ```
 public class Book { 
@@ -68,7 +68,7 @@ public class Book {
 }
 ```
 * Generate `toString()` method
-* Add to the body of the method
+* Add to the body of the method `createAQuarkusBook`
 ```
     Book book = new Book();
     book.title = title;
@@ -85,6 +85,10 @@ public class Book {
 ```
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books -v | jq`
 
+### Dev UI
+
+* Go to http://localhost:8702/q/dev
+
 ### OpenAPI and Swagger UI
 
 * Go to http://localhost:8702/q/swagger-ui Swagger UI is not there
@@ -94,7 +98,7 @@ public class Book {
 
 ### Change test
 
-* Split editor in 2
+* Tests don't pass
 * Rename `testHelloEndpoint` in `shouldCreateAQuarkusBook`
 * Change the `given` to `given().body("title of the book")`
 * Change the `when` from a `get` to `.post("/api/books").`
@@ -203,7 +207,7 @@ $ git commit -am "rest client"
 * Add fallback extension `mvn quarkus:add-extension -Dextensions="smallrye-fault-tolerance"`
 * In `BookResource` copy/paste the method `createAQuarkusBook` and change the name to `fallbackOnCreateAQuarkusBook`
 * Change isbn to `book.isbn = "needs to be set later as the Number microservices is down"`
-* Change `logger.warn("### FallBack !!! Book will be created " + book);`
+* Change `logger.warn("### FallBack !!! Book will be created later " + book);`
 * Add `@Fallback(fallbackMethod = "fallbackOnCreateAQuarkusBook")`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * Start Number, curl, Kill Number, curl
@@ -219,7 +223,7 @@ $ git commit -am "fallback"
 
 ### Send the book to a channel 
 
-* Add Kafka extension `mvn quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"`
+* In Book add Kafka extension `mvn quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"`
 * Add the channel `@Inject @Channel("failed-books") Emitter<String> failedBook;`
 * In `fallbackOnCreateAQuarkusBook` add `failedBook.send(book.toString());`
 
@@ -231,20 +235,15 @@ mp.messaging.outgoing.failed-books.connector=smallrye-kafka
 mp.messaging.outgoing.failed-books.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 ```
 
-/!\ skip if no time /!\
-* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
-* Logs on Book `could not be established. Broker may not be available`
-* Start Kafka `docker-compose -f infrastructure/kafka.yaml up -d`
-* Check Kafka ` docker container ls`
-* Logs have stopped 
-* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
-
 ### Create the Book Fallback Subscriber
 
 * Execute `./bootstrap-book-fallback.sh`
 * In `BookFallbackSubscriber` remove the `@Path`, `@GET`, `@Produces`
 * Rename `hello` with `bookToBeCreatedLater` 
 ```
+@Inject
+Logger logger;
+
 @Incoming("failed-books")
 public void bookToBeCreatedLater(String book) {
     logger.info("### Book to be created later " + book);
@@ -261,6 +260,7 @@ mp.messaging.incoming.failed-books.connector=smallrye-kafka
 mp.messaging.incoming.failed-books.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
 ```
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+* Execute the `loop.sh` script
 
 ### Git
 
@@ -271,7 +271,32 @@ $ git commit -am "kafka"
 
 ### Start and Kill the Number microservice 
 
-## Demo 06 - Packaging
+## Demo 06 - Persist Books (if time)
+
+### Book Entity
+
+* In Book add Panache and Postgres `mvn quarkus:add-extension -Dextensions="jdbc-postgres,hibernate-orm-panache"`
+* Add `@Entity` to Book and `extends PanacheEntity`
+* In `BookResource.createAQuarkusBook` add `book.persist();`
+* Add `@Transactional` to the `createAQuarkusBook` method
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+
+### List Books
+
+* Create a new `listAllQuarkusBooks` method
+```
+@GET
+@Produces(MediaType.APPLICATION_JSON)
+public List<Book> listAllQuarkusBooks() {
+    logger.info("### Books in the database " + Book.count());
+    return Book.listAll();
+}
+```
+* `curl http://localhost:8702/api/books`
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+* `curl http://localhost:8702/api/books`
+
+## Demo 07 - Packaging
 
 ### Package
 
@@ -293,12 +318,18 @@ $ git commit -am "kafka"
 ### Native Linux Executable and Docker
 
 * `docker image ls | grep agoncal`
-* Add Docker extension `mvn quarkus:add-extension -Dextensions="container-image-docker"`
+* To the 3 microservices add Docker extension `mvn quarkus:add-extension -Dextensions="container-image-docker"`
 * Show the `Dockerfile.native` file
 * `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true`  
 * `ll target` show size of the executable
 * `./target/number-1.0-SNAPSHOT-runner`
 * could not be run by the operating system
 * `docker image ls | grep agoncal`
-* Execute `docker container run -i --rm -p 8701:8701 agoncal/number:1.0-SNAPSHOT`
+* Execute `docker container run -i --rm -p 8701:8701 agoncal/number:1.0.0-SNAPSHOT`
 * `curl http://localhost:8701/api/numbers`
+
+### Execute all with Docker Compose
+
+* `docker image ls | grep agoncal`
+* Show `infrastructure/app.yaml`
+

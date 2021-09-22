@@ -4,12 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.agoncal.talk.quarkus</groupId>
   <artifactId>microservices</artifactId>
-  <version>1.0</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Quarkus :: Microservices</name>
   <modules>
-    <module>number</module>
     <module>book</module>
+    <module>number</module>
     <module>book-fallback</module>
   </modules>
 </project>

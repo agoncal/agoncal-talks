@@ -12,6 +12,6 @@ public class BookFallbackSubscriber {
 
     @Incoming("failed-books")
     public void bookToBeCreatedLater(String book) {
-        logger.info("### Book to be created later" + book);
+        logger.info("### Book to be created later " + book);
     }
 }
