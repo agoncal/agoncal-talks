@@ -279,6 +279,7 @@ $ git commit -am "kafka"
 * Add `@Entity` to Book and `extends PanacheEntity`
 * In `BookResource.createAQuarkusBook` add `book.persist();`
 * Add `@Transactional` to the `createAQuarkusBook` method
+* `quarkus.hibernate-orm.database.generation=drop-and-create` 
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 
 ### List Books
