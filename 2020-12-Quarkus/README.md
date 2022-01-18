@@ -119,6 +119,7 @@ public class Book {
     .body("$", hasKey("createdAt"));
 ```
 * Press `r` in the continuous testing
+* Show `mvn test` while Quarkus is running
 
 ### Git
 
@@ -248,8 +249,9 @@ mp.messaging.outgoing.failed-books.value.serializer=org.apache.kafka.common.seri
 ### Create the Book Fallback Subscriber
 
 * Execute `./bootstrap-book-fallback.sh`
-* In `BookFallbackSubscriber` remove the `@Path`, `@GET`, `@Produces`
-* Rename `hello` with `bookToBeCreatedLater` 
+* Rename `MyReactiveMessagingApplication` in `BookFallbackSubscriber`
+* In `BookFallbackSubscriber` remove the `Emitter` attribute, `onStart` and `toUpperCase` methods
+* Rename `sink` with `bookToBeCreatedLater` 
 ```
 @Inject
 Logger logger;
@@ -259,7 +261,6 @@ public void bookToBeCreatedLater(String book) {
     logger.info("### Book to be created later " + book);
 }
 ```
-* Make sure the method returns `void`
 * Remove the test (delete the `src/main/test` folder) 
 
 ### Configure the channel
@@ -308,11 +309,18 @@ public List<Book> listAllQuarkusBooks() {
     return Book.listAll();
 }
 ```
-* `curl http://localhost:8702/api/books`
+* `curl http://localhost:8702/api/books | jq`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * `curl http://localhost:8702/api/books`
 
-## Demo 07 - Packaging
+## Demo 07 - Augmentation
+
+* Package Book with `mvn clean package -Dmaven.test.skip=true`
+* `unzip target/quarkus-app/quarkus/generated-bytecode.jar -d target/generated`
+* `unzip target/quarkus-app/quarkus/transformed-bytecode.jar  -d target/transformed`
+* Show byte code in `unzipped/gen/org/agoncal/talk/quarkus/book`
+
+## Demo 08 - Packaging
 
 ### Package
 
