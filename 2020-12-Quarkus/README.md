@@ -315,7 +315,10 @@ public List<Book> listAllQuarkusBooks() {
 
 ## Demo 07 - Augmentation
 
+* Set the property `-Dquarkus.package.fernflower.enabled=true`
 * Package Book with `mvn clean package -Dmaven.test.skip=true`
+* Show byte code in `target/decompiled`
+
 * `unzip target/quarkus-app/quarkus/generated-bytecode.jar -d target/generated`
 * `unzip target/quarkus-app/quarkus/transformed-bytecode.jar  -d target/transformed`
 * Show byte code in `unzipped/gen/org/agoncal/talk/quarkus/book`
