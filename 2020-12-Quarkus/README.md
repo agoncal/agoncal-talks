@@ -318,10 +318,8 @@ public List<Book> listAllQuarkusBooks() {
 * Set the property `-Dquarkus.package.fernflower.enabled=true`
 * Package Book with `mvn clean package -Dmaven.test.skip=true`
 * Show byte code in `target/decompiled`
-
-* `unzip target/quarkus-app/quarkus/generated-bytecode.jar -d target/generated`
-* `unzip target/quarkus-app/quarkus/transformed-bytecode.jar  -d target/transformed`
-* Show byte code in `unzipped/gen/org/agoncal/talk/quarkus/book`
+* Show `generated-bytecode/META-INF/quarkus-generated-openapi-doc.JSON`
+* Show `transformed-bytecode/org/agoncal/talk/quarkus/book/Book.java`
 
 ## Demo 08 - Packaging
 
