@@ -311,7 +311,7 @@ public List<Book> listAllQuarkusBooks() {
 ```
 * `curl http://localhost:8702/api/books | jq`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
-* `curl http://localhost:8702/api/books`
+* `curl http://localhost:8702/api/books | jq`
 
 ## Demo 07 - Augmentation
 
@@ -358,4 +358,7 @@ public List<Book> listAllQuarkusBooks() {
 
 * `docker image ls | grep agoncal`
 * Show `infrastructure/app.yaml`
-
+* Run `docker-compose -f infrastructure/app.yaml up`
+* `curl http://localhost:8701/api/numbers`
+* `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
+* `curl http://localhost:8702/api/books | jq`
