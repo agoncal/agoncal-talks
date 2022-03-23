@@ -402,7 +402,7 @@ az provider register --namespace Microsoft.Web
 * Set the following environment variables
 
 ```shell
-RESOURCE_GROUP="rg_bookstore-apps"
+RESOURCE_GROUP="rg-bookstore-apps"
 LOCATION="westeurope"
 LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
 CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
@@ -421,6 +421,7 @@ az group create --name $RESOURCE_GROUP --location $LOCATION
 ```shell
 az monitor log-analytics workspace create \
   --resource-group $RESOURCE_GROUP \
+  --location $LOCATION \
   --workspace-name $LOG_ANALYTICS_WORKSPACE
 ```
 
@@ -444,7 +445,21 @@ az containerapp env create \
   --location $LOCATION
 ````
 
-### Create a container app
+### Create the managed environment
+
+We need to create a PostgreSQL as well as a Kafka.
+
+```shell
+az postgres server create \
+  --name db-bookstore \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION \
+  --admin-user userbookstore \
+  --admin-password p#ssw0rd-12046 \
+  --sku-name B_Gen5_1
+```
+
+### Create the containers
 
 ```shell
 az containerapp create \
@@ -452,20 +467,34 @@ az containerapp create \
   --name number-container-app \
   --resource-group $RESOURCE_GROUP \
   --environment $CONTAINERAPPS_ENVIRONMENT \
+  --ingress external \
+  --target-port 8701 \
   --query configuration.ingress.fqdn
-  
+```
+
+```shell
 az containerapp create \
   --image agoncal/book:1.0.0-SNAPSHOT \
   --name book-container-app \
   --resource-group $RESOURCE_GROUP \
   --environment $CONTAINERAPPS_ENVIRONMENT \
+  --ingress external \
+  --target-port 8702 \
   --query configuration.ingress.fqdn
   
+```shell
 az containerapp create \
   --image agoncal/book-fallback:1.0.0-SNAPSHOT \
   --name book-fallback-container-app \
   --resource-group $RESOURCE_GROUP \
   --environment $CONTAINERAPPS_ENVIRONMENT
+```
+
+### Check
+
+```shell
+az containerapp list --resource-group $RESOURCE_GROUP --output table 
+az containerapp show --resource-group $RESOURCE_GROUP --output table --name number-container-app 
 ```
 
 ```shell
@@ -475,7 +504,7 @@ az monitor log-analytics query \
   --out table
 ```
 
-### Access the endpoints
+### Access the application
 
 In the overview you find the URL https://number-container-app.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io but it's not this one.
 You need to check the _Revision Management_ and get the _Application Url_:
