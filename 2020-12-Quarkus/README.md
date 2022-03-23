@@ -362,3 +362,124 @@ public List<Book> listAllQuarkusBooks() {
 * `curl http://localhost:8701/api/numbers`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * `curl http://localhost:8702/api/books | jq`
+
+## Deploying to Azure Container Apps
+
+[Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/) allows to run containerized applications without worrying about orchestration or infrastructure (i.e. we don't have to directly use K8s, it's used under the hoods).
+For that, the Docker images need to be publicly accessible.
+
+### Docker Hub
+
+To push the images to Docker Hub, execute the following commands:
+
+```shell
+$ docker login
+$ docker push agoncal/book-fallback:1.0.0-SNAPSHOT
+$ docker push agoncal/book:1.0.0-SNAPSHOT
+$ docker push agoncal/number:1.0.0-SNAPSHOT
+```
+
+### Setup
+
+* Sign in to Azure from the CLI:
+
+```shell
+az login
+```
+* 
+* Install the Azure Container Apps extension for the CLI:
+
+```shell
+az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.4-py2.py3-none-any.whl
+```
+
+* Register the Microsoft.Web namespace
+
+```shell
+az provider register --namespace Microsoft.Web
+```
+
+* Set the following environment variables
+
+```shell
+RESOURCE_GROUP="rg_bookstore-apps"
+LOCATION="westeurope"
+LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
+CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
+```
+
+* Create a resource group 
+
+```shell
+az group create --name $RESOURCE_GROUP --location $LOCATION
+```
+
+### Create an environment
+
+* Create a Log Analytics workspace
+
+```shell
+az monitor log-analytics workspace create \
+  --resource-group $RESOURCE_GROUP \
+  --workspace-name $LOG_ANALYTICS_WORKSPACE
+```
+
+* Retrieve the Log Analytics Client ID and client secret:
+
+```shell
+LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az monitor log-analytics workspace show --query customerId -g $RESOURCE_GROUP -n $LOG_ANALYTICS_WORKSPACE -o tsv | tr -d '[:space:]'`
+echo $LOG_ANALYTICS_WORKSPACE_CLIENT_ID
+LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET=`az monitor log-analytics workspace get-shared-keys --query primarySharedKey -g $RESOURCE_GROUP -n $LOG_ANALYTICS_WORKSPACE -o tsv | tr -d '[:space:]'`
+echo $LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET
+```
+
+* Create the environment:
+
+````shell
+az containerapp env create \
+  --name $CONTAINERAPPS_ENVIRONMENT \
+  --resource-group $RESOURCE_GROUP \
+  --logs-workspace-id $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
+  --logs-workspace-key $LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET \
+  --location $LOCATION
+````
+
+### Create a container app
+
+```shell
+az containerapp create \
+  --image agoncal/number:1.0.0-SNAPSHOT \
+  --name number-container-app \
+  --resource-group $RESOURCE_GROUP \
+  --environment $CONTAINERAPPS_ENVIRONMENT \
+  --query configuration.ingress.fqdn
+  
+az containerapp create \
+  --image agoncal/book:1.0.0-SNAPSHOT \
+  --name book-container-app \
+  --resource-group $RESOURCE_GROUP \
+  --environment $CONTAINERAPPS_ENVIRONMENT \
+  --query configuration.ingress.fqdn
+  
+az containerapp create \
+  --image agoncal/book-fallback:1.0.0-SNAPSHOT \
+  --name book-fallback-container-app \
+  --resource-group $RESOURCE_GROUP \
+  --environment $CONTAINERAPPS_ENVIRONMENT
+```
+
+```shell
+az monitor log-analytics query \
+  --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
+  --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'number-container-app' | project ContainerAppName_s, Log_s, TimeGenerated" \
+  --out table
+```
+
+### Access the endpoints
+
+In the overview you find the URL https://number-container-app.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io but it's not this one.
+You need to check the _Revision Management_ and get the _Application Url_:
+
+```shell
+curl https://number-container-app--tttqe1l.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io/api/numbers -v
+```
