@@ -448,12 +448,19 @@ az containerapp env create \
 ### Create the managed environment
 
 We need to create a PostgreSQL as well as a Kafka.
+To know which SKUs are available in a region, execute the following command:
+
+```shell
+az postgres server list-skus --location $LOCATION
+```
+
+Then, create a database in the region where it's available:
 
 ```shell
 az postgres server create \
   --name db-bookstore \
   --resource-group $RESOURCE_GROUP \
-  --location $LOCATION \
+  --location eastus \
   --admin-user userbookstore \
   --admin-password p#ssw0rd-12046 \
   --sku-name B_Gen5_1
