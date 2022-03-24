@@ -368,7 +368,13 @@ public List<Book> listAllQuarkusBooks() {
 [Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/) allows to run containerized applications without worrying about orchestration or infrastructure (i.e. we don't have to directly use K8s, it's used under the hoods).
 For that, the Docker images need to be publicly accessible.
 
-### Docker Hub
+### Building and Pushing Docker images to Docker Hub
+
+Buid the native images with the following command on the 3 microservices:
+
+```shell
+mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true
+```
 
 To push the images to Docker Hub, execute the following commands:
 
@@ -463,7 +469,17 @@ az postgres server create \
   --location eastus \
   --admin-user userbookstore \
   --admin-password p#ssw0rd-12046 \
-  --sku-name B_Gen5_1
+  --sku-name B_Gen5_1 \
+  --version 11
+```
+
+Get the connection string with the following command:
+
+```shell
+az postgres server show-connection-string \
+  --database-name db-bookstore \
+  --admin-user userbookstore \
+  --admin-password p#ssw0rd-12046
 ```
 
 ### Deploy the microservices
@@ -518,5 +534,7 @@ In the overview you find the URL https://number-container-app.yellowsmoke-42d76b
 You need to check the _Revision Management_ and get the _Application Url_:
 
 ```shell
-curl https://number-container-app--tttqe1l.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io/api/numbers -v
+curl https://number-container-app.bluedesert-3132d8f7.westeurope.azurecontainerapps.io/api/numbers -v
+curl https://book-container-app.bluedesert-3132d8f7.westeurope.azurecontainerapps.io/api/books -v
+curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.bluedesert-3132d8f7.westeurope.azurecontainerapps.io/api/books -v | jq
 ```
