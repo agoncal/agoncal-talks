@@ -466,7 +466,7 @@ az postgres server create \
   --sku-name B_Gen5_1
 ```
 
-### Create the containers
+### Deploy the microservices
 
 ```shell
 az containerapp create \
@@ -488,7 +488,8 @@ az containerapp create \
   --ingress external \
   --target-port 8702 \
   --query configuration.ingress.fqdn
-  
+```
+
 ```shell
 az containerapp create \
   --image agoncal/book-fallback:1.0.0-SNAPSHOT \
