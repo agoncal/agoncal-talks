@@ -408,11 +408,15 @@ az provider register --namespace Microsoft.Web
 * Set the following environment variables
 
 ```shell
-RESOURCE_GROUP="rg-bookstore-apps"
-LOCATION="westeurope"
+RESOURCE_GROUP="rg-bookstore"
+LOCATION="eastus2"
 LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
 CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
+DATABASE_NAME="bookstore-db-antoniomanug"
+LOCAL_IP_ADDRESS=xxx.xxx.xxx.xxx
 ```
+
+A convenient way to know the local IP address is to go to http://whatismyip.akamai.com
 
 * Create a resource group 
 
@@ -464,20 +468,37 @@ Then, create a database in the region where it's available:
 
 ```shell
 az postgres server create \
-  --name db-bookstore \
   --resource-group $RESOURCE_GROUP \
-  --location eastus \
+  --location $LOCATION \
+  --name $DATABASE_NAME \
   --admin-user userbookstore \
   --admin-password p#ssw0rd-12046 \
   --sku-name B_Gen5_1 \
-  --version 11
+  --storage-size 5120 \
+  --version 11 \
+  --ssl-enforcement Disabled
+```
+
+```shell
+az postgres server firewall-rule create \
+    --resource-group $RESOURCE_GROUP \
+    --name $DATABASE_NAME-allow-local-ip \
+    --server $DATABASE_NAME \
+    --start-ip-address $LOCAL_IP_ADDRESS \
+    --end-ip-address $LOCAL_IP_ADDRESS
+```
+```shell
+az postgres db create \
+    --resource-group $RESOURCE_GROUP \
+    --name book \
+    --server-name $DATABASE_NAME
 ```
 
 Get the connection string with the following command:
 
 ```shell
 az postgres server show-connection-string \
-  --database-name db-bookstore \
+  --database-name bookstore-db \
   --admin-user userbookstore \
   --admin-password p#ssw0rd-12046
 ```
@@ -534,7 +555,7 @@ In the overview you find the URL https://number-container-app.yellowsmoke-42d76b
 You need to check the _Revision Management_ and get the _Application Url_:
 
 ```shell
-curl https://number-container-app.bluedesert-3132d8f7.westeurope.azurecontainerapps.io/api/numbers -v
-curl https://book-container-app.bluedesert-3132d8f7.westeurope.azurecontainerapps.io/api/books -v
-curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.bluedesert-3132d8f7.westeurope.azurecontainerapps.io/api/books -v | jq
+curl https://number-container-app.happypond-31fc23d3.eastus2.azurecontainerapps.io/api/numbers -v
+curl https://book-container-app.happypond-31fc23d3.eastus2.azurecontainerapps.io/api/books -v
+curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.happypond-31fc23d3.eastus2.azurecontainerapps.io/api/books -v | jq
 ```
