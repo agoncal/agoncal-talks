@@ -475,8 +475,7 @@ az postgres server create \
   --admin-password p#ssw0rd-12046 \
   --sku-name B_Gen5_1 \
   --storage-size 5120 \
-  --version 11 \
-  --ssl-enforcement Disabled
+  --version 11
 ```
 
 ```shell
@@ -498,7 +497,7 @@ Get the connection string with the following command:
 
 ```shell
 az postgres server show-connection-string \
-  --database-name bookstore-db \
+  --database-name $DATABASE_NAME \
   --admin-user userbookstore \
   --admin-password p#ssw0rd-12046
 ```
@@ -549,13 +548,40 @@ az monitor log-analytics query \
   --out table
 ```
 
+### Checking Logs
+
+To access the logs of each microservice, you can write the following queries:
+
+````shell
+az monitor log-analytics query \
+--workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'number-container-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
+--out table
+````
+
+````shell
+az monitor log-analytics query \
+--workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'book-container-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
+--out table
+````
+
+````shell
+az monitor log-analytics query \
+--workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'book-fallback-container-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
+--out table
+````
+
+
 ### Access the application
 
 In the overview you find the URL https://number-container-app.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io but it's not this one.
 You need to check the _Revision Management_ and get the _Application Url_:
 
 ```shell
-curl https://number-container-app.happypond-31fc23d3.eastus2.azurecontainerapps.io/api/numbers -v
+curl https://number-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/numbers -v
 curl https://book-container-app.happypond-31fc23d3.eastus2.azurecontainerapps.io/api/books -v
 curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.happypond-31fc23d3.eastus2.azurecontainerapps.io/api/books -v | jq
 ```
+
