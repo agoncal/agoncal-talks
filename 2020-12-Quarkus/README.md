@@ -392,7 +392,7 @@ $ docker push agoncal/number:1.0.0-SNAPSHOT
 ```shell
 az login
 ```
-* 
+
 * Install the Azure Container Apps extension for the CLI:
 
 ```shell
@@ -412,11 +412,8 @@ RESOURCE_GROUP="rg-bookstore"
 LOCATION="eastus2"
 LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
 CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
-DATABASE_NAME="bookstore-db-antoniomanug"
-LOCAL_IP_ADDRESS=xxx.xxx.xxx.xxx
+DATABASE_NAME="bookstore-db"
 ```
-
-A convenient way to know the local IP address is to go to http://whatismyip.akamai.com
 
 * Create a resource group 
 
@@ -455,9 +452,9 @@ az containerapp env create \
   --location $LOCATION
 ````
 
-### Create the managed environment
+### Create the managed Postgres Database
 
-We need to create a PostgreSQL as well as a Kafka.
+We need to create a PostgreSQL so the Book microservice can store data.
 To know which SKUs are available in a region, execute the following command:
 
 ```shell
@@ -478,14 +475,8 @@ az postgres server create \
   --version 11
 ```
 
-```shell
-az postgres server firewall-rule create \
-    --resource-group $RESOURCE_GROUP \
-    --name $DATABASE_NAME-allow-local-ip \
-    --server $DATABASE_NAME \
-    --start-ip-address $LOCAL_IP_ADDRESS \
-    --end-ip-address $LOCAL_IP_ADDRESS
-```
+Create the Book database:
+
 ```shell
 az postgres db create \
     --resource-group $RESOURCE_GROUP \
@@ -493,7 +484,19 @@ az postgres db create \
     --server-name $DATABASE_NAME
 ```
 
-Get the connection string with the following command:
+If you want to access the Postgres database from your local machine, you need to give access to your local IP address.
+A convenient way to know the local IP address is to go to http://whatismyip.akamai.com:
+
+```shell
+az postgres server firewall-rule create \
+    --resource-group $RESOURCE_GROUP \
+    --name $DATABASE_NAME-allow-book-ip \
+    --server $DATABASE_NAME \
+    --start-ip-address <LOCAL_IP_ADDRESS> \
+    --end-ip-address <LOCAL_IP_ADDRESS>
+```
+
+Get the connection string with the following command so you can connect to it:
 
 ```shell
 az postgres server show-connection-string \
@@ -501,6 +504,8 @@ az postgres server show-connection-string \
   --admin-user userbookstore \
   --admin-password p#ssw0rd-12046
 ```
+
+Use Data Explorer if you want to check the content of the database: https://dataexplorer.azure.com
 
 ### Deploy the microservices
 
@@ -534,18 +539,22 @@ az containerapp create \
   --environment $CONTAINERAPPS_ENVIRONMENT
 ```
 
+If you need to update the container:
+
+```shell
+az containerapp update \
+  --name book-container-app \
+  --resource-group $RESOURCE_GROUP \
+  --environment $CONTAINERAPPS_ENVIRONMENT
+```
+
+
+
 ### Check
 
 ```shell
 az containerapp list --resource-group $RESOURCE_GROUP --output table 
 az containerapp show --resource-group $RESOURCE_GROUP --output table --name number-container-app 
-```
-
-```shell
-az monitor log-analytics query \
-  --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-  --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'number-container-app' | project ContainerAppName_s, Log_s, TimeGenerated" \
-  --out table
 ```
 
 ### Checking Logs
@@ -555,7 +564,7 @@ To access the logs of each microservice, you can write the following queries:
 ````shell
 az monitor log-analytics query \
 --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
---analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'number-container-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'number-container-app' | project ContainerAppName_s, Log_s, TimeGenerated " \
 --out table
 ````
 
@@ -581,7 +590,7 @@ You need to check the _Revision Management_ and get the _Application Url_:
 
 ```shell
 curl https://number-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/numbers -v
-curl https://book-container-app.happypond-31fc23d3.eastus2.azurecontainerapps.io/api/books -v
-curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.happypond-31fc23d3.eastus2.azurecontainerapps.io/api/books -v | jq
+curl https://book-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/books -v
+curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/books -v | jq
 ```
 
