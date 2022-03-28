@@ -370,7 +370,13 @@ For that, the Docker images need to be publicly accessible.
 
 ### Building and Pushing Docker images to Docker Hub
 
-Build the native images with the following command on the 3 microservices (using the SNAPSHOT tag):
+You can build the image using JVM mode with:
+
+```shell
+mvn clean package -Dmaven.test.skip=true -Dquarkus.container-image.build=true
+```
+
+If you want to build the native images, you can do so with the following command on the 3 microservices (using the SNAPSHOT tag):
 
 ```shell
 mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true
@@ -419,6 +425,8 @@ LOCATION="eastus2"
 LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
 CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
 DATABASE_NAME="bookstore-db"
+EVENTHUB_NAMESPACE="bookstore-event"
+EVENTHUB_NAME="bookstore-event-hub"
 ```
 
 * Create a resource group 
@@ -522,6 +530,22 @@ az postgres server show-connection-string \
 
 Use Data Explorer if you want to check the content of the database: https://dataexplorer.azure.com
 
+### Create the Managed Event Hub
+
+```shell
+az eventhubs namespace create \
+  --name $EVENTHUB_NAMESPACE \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION
+```
+
+```shell
+az eventhubs eventhub create \
+  --name $EVENTHUB_NAME \
+  --namespace-name $EVENTHUB_NAMESPACE \
+  --resource-group $RESOURCE_GROUP
+```
+
 ### Deploy the microservices
 
 ```shell
@@ -537,6 +561,9 @@ az containerapp create \
 
 This command returns the fully qualified name of the endpoint (eg. `number-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io`).
 That means you can now access the microservice with `curl https://number-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/numbers`
+
+The Book microservice needs to access the database.
+We need to pass the Quarkus database variables:
 
 ```shell
 az containerapp create \
@@ -572,7 +599,7 @@ In the overview you find the URL https://number-container-app.yellowsmoke-42d76b
 You need to check the _Revision Management_ and get the _Application Url_:
 
 ```shell
-curl https://number-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/numbers -v
+curl https://number-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/numbers -v
 curl https://book-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/books -v
 curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/books -v | jq
 ```
@@ -635,5 +662,25 @@ az monitor log-analytics query \
 --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'book-fallback-container-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
 --out table
 ````
+### Troubleshooting
 
+If you have the following error message you can either:
+
+* make sure you've created a Firewall rule so that the Book microservice can access the Postgres Database
+* make sure you've added `ssl=true&sslmode=require` in the Postgres connection string
+
+```shell
+FATAL: no pg_hba.conf entry for host "20.96.49.141",
+```
+
+Passing environment variables does not work because of characters:
+
+```shell
+--environment-variables QUARKUS_DATASOURCE_USERNAME=userbookstore@bookstore-db-antoniomanug.postgres.database.azure.com,QUARKUS_DATASOURCE_PASSWORD=p#ssw0rd-12046,QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://bookstore-db-antoniomanug.postgres.database.azure.com:5432/book?ssl=true&sslmode=require
+```
+
+
+```shell
+error:1404B42E:SSL routines:ST_CONNECT:tlsv1 alert protocol version
+```
 
