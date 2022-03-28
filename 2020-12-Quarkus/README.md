@@ -435,7 +435,7 @@ EVENTHUB_NAME="bookstore-event-hub"
 az group create --name $RESOURCE_GROUP --location $LOCATION
 ```
 
-### Create an environment
+### Create a Container Apps environment
 
 * Create a Log Analytics workspace
 
@@ -528,7 +528,13 @@ az postgres server show-connection-string \
   --admin-password p#ssw0rd-12046
 ```
 
-Use Data Explorer if you want to check the content of the database: https://dataexplorer.azure.com
+Add this connection string to the `application.properties` file, with the `prod` profile:
+
+```
+%prod.quarkus.datasource.username=userbookstore@bookstore-db-antoniomanug.postgres.database.azure.com
+%prod.quarkus.datasource.password=p#ssw0rd-12046
+%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://bookstore-db-antoniomanug.postgres.database.azure.com:5432/book?ssl=true&sslmode=require
+```
 
 ### Create the Managed Event Hub
 
@@ -559,11 +565,15 @@ az containerapp create \
   --query configuration.ingress.fqdn
 ```
 
-This command returns the fully qualified name of the endpoint (eg. `number-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io`).
-That means you can now access the microservice with `curl https://number-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/numbers`
+This command returns the fully qualified name of the endpoint (eg. `number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io`).
+That means you can now access the microservice with `curl https://number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers`
+Take this fully qualified name and add it to the `application.properties` of Book:
 
-The Book microservice needs to access the database.
-We need to pass the Quarkus database variables:
+```shell
+%prod.org.agoncal.talk.quarkus.book.NumberProxy/mp-rest/url=https://number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io
+```
+
+Deploy the Book microservice:
 
 ```shell
 az containerapp create \
@@ -576,13 +586,15 @@ az containerapp create \
   --query configuration.ingress.fqdn
 ```
 
+To be able to access the database, we need to configure the firewall and allow the IP address of the Book microservice:
+
 ```shell
 az postgres server firewall-rule create \
     --resource-group $RESOURCE_GROUP \
     --name $DATABASE_NAME-allow-book-ip \
     --server $DATABASE_NAME \
-    --start-ip-address 20.96.49.141 \
-    --end-ip-address 20.96.49.141
+    --start-ip-address 52.167.13.244 \
+    --end-ip-address 52.167.13.244
 ```
 
 ```shell
@@ -599,9 +611,9 @@ In the overview you find the URL https://number-container-app.yellowsmoke-42d76b
 You need to check the _Revision Management_ and get the _Application Url_:
 
 ```shell
-curl https://number-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/numbers -v
-curl https://book-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/books -v
-curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/books -v | jq
+curl https://number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers -v
+curl https://book-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
+curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
 ```
 
 ### Redeploy a microservice
