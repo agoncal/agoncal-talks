@@ -370,10 +370,16 @@ For that, the Docker images need to be publicly accessible.
 
 ### Building and Pushing Docker images to Docker Hub
 
-Buid the native images with the following command on the 3 microservices:
+Build the native images with the following command on the 3 microservices (using the SNAPSHOT tag):
 
 ```shell
 mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true
+```
+
+If you want to tag your Docker image, you can use the `quarkus.container-image.tag` parameter
+
+```shell
+mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true -Dquarkus.container-image.tag=azure
 ```
 
 To push the images to Docker Hub, execute the following commands:
@@ -490,11 +496,20 @@ A convenient way to know the local IP address is to go to http://whatismyip.akam
 ```shell
 az postgres server firewall-rule create \
     --resource-group $RESOURCE_GROUP \
-    --name $DATABASE_NAME-allow-book-ip \
+    --name $DATABASE_NAME-allow-local-ip \
     --server $DATABASE_NAME \
     --start-ip-address <LOCAL_IP_ADDRESS> \
     --end-ip-address <LOCAL_IP_ADDRESS>
 ```
+
+You can check the firewall rules with:
+
+````shell
+az postgres server firewall-rule list  \
+    --resource-group $RESOURCE_GROUP \
+    --server-name $DATABASE_NAME \
+    --out table
+````
 
 Get the connection string with the following command so you can connect to it:
 
@@ -520,6 +535,9 @@ az containerapp create \
   --query configuration.ingress.fqdn
 ```
 
+This command returns the fully qualified name of the endpoint (eg. `number-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io`).
+That means you can now access the microservice with `curl https://number-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/numbers`
+
 ```shell
 az containerapp create \
   --image agoncal/book:1.0.0-SNAPSHOT \
@@ -532,6 +550,15 @@ az containerapp create \
 ```
 
 ```shell
+az postgres server firewall-rule create \
+    --resource-group $RESOURCE_GROUP \
+    --name $DATABASE_NAME-allow-book-ip \
+    --server $DATABASE_NAME \
+    --start-ip-address 20.96.49.141 \
+    --end-ip-address 20.96.49.141
+```
+
+```shell
 az containerapp create \
   --image agoncal/book-fallback:1.0.0-SNAPSHOT \
   --name book-fallback-container-app \
@@ -539,18 +566,45 @@ az containerapp create \
   --environment $CONTAINERAPPS_ENVIRONMENT
 ```
 
-If you need to update the container:
+### Access the application
+
+In the overview you find the URL https://number-container-app.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io but it's not this one.
+You need to check the _Revision Management_ and get the _Application Url_:
+
+```shell
+curl https://number-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/numbers -v
+curl https://book-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/books -v
+curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.gentlesea-f800e161.eastus2.azurecontainerapps.io/api/books -v | jq
+```
+
+### Redeploy a microservice
+
+If you need to restart the container, first check the name of the revision:
+
+```shell
+az containerapp revision list \
+--name book-container-app \
+--resource-group $RESOURCE_GROUP \
+--out table
+```
+
+```shell
+az containerapp revision restart \
+  --name book-container-app--bl3tzvc \
+  --app book-container-app \
+  --resource-group $RESOURCE_GROUP
+```
+
+If you want to change the revision to a new Docker image, update the container (in this case using a different tag `azure`):
 
 ```shell
 az containerapp update \
   --name book-container-app \
   --resource-group $RESOURCE_GROUP \
-  --environment $CONTAINERAPPS_ENVIRONMENT
+  --image agoncal/book:azure
 ```
 
-
-
-### Check
+### Check the microservices in the Container App
 
 ```shell
 az containerapp list --resource-group $RESOURCE_GROUP --output table 
@@ -582,15 +636,4 @@ az monitor log-analytics query \
 --out table
 ````
 
-
-### Access the application
-
-In the overview you find the URL https://number-container-app.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io but it's not this one.
-You need to check the _Revision Management_ and get the _Application Url_:
-
-```shell
-curl https://number-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/numbers -v
-curl https://book-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/books -v
-curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.gentlegrass-94d5797e.eastus2.azurecontainerapps.io/api/books -v | jq
-```
 
