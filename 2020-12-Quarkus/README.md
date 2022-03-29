@@ -426,7 +426,7 @@ LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
 CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
 DATABASE_NAME="bookstore-db"
 EVENTHUB_NAMESPACE="bookstore-event"
-EVENTHUB_NAME="bookstore-event-hub"
+EVENTHUB_NAME="failed-books"
 ```
 
 * Create a resource group 
@@ -530,13 +530,16 @@ az postgres server show-connection-string \
 
 Add this connection string to the `application.properties` file, with the `prod` profile:
 
-```
+```shell
 %prod.quarkus.datasource.username=userbookstore@bookstore-db-antoniomanug.postgres.database.azure.com
 %prod.quarkus.datasource.password=p#ssw0rd-12046
 %prod.quarkus.datasource.jdbc.url=jdbc:postgresql://bookstore-db-antoniomanug.postgres.database.azure.com:5432/book?ssl=true&sslmode=require
 ```
 
 ### Create the Managed Event Hub
+
+The Book microservice communicates with the Book Fail microservice through Kafka.
+We need to create an Azure event hub for that.
 
 ```shell
 az eventhubs namespace create \
@@ -550,6 +553,16 @@ az eventhubs eventhub create \
   --name $EVENTHUB_NAME \
   --namespace-name $EVENTHUB_NAMESPACE \
   --resource-group $RESOURCE_GROUP
+```
+
+Get the connection string of the event hub namespace
+
+```shell
+az eventhubs namespace authorization-rule keys list \
+  --resource-group $RESOURCE_GROUP \
+  --namespace-name $EVENTHUB_NAMESPACE \
+  --name RootManageSharedAccessKey \
+  --query primaryConnectionString
 ```
 
 ### Deploy the microservices
