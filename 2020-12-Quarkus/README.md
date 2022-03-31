@@ -376,6 +376,12 @@ You can build the image using JVM mode with:
 mvn clean package -Dmaven.test.skip=true -Dquarkus.container-image.build=true
 ```
 
+If you want a specific tag with your images you can use:
+
+```shell
+mvn clean package -Dmaven.test.skip=true -Dquarkus.container-image.build=true -Dquarkus.container-image.tag=azure
+```
+
 If you want to build the native images, you can do so with the following command on the 3 microservices (using the SNAPSHOT tag):
 
 ```shell
@@ -426,7 +432,7 @@ LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
 CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
 DATABASE_NAME="bookstore-db"
 EVENTHUB_NAMESPACE="bookstore-event"
-EVENTHUB_NAME="failed-books"
+EVENTHUB_NAME="failed-books-topic"
 ```
 
 * Create a resource group 
@@ -612,7 +618,7 @@ az postgres server firewall-rule create \
 
 ```shell
 az containerapp create \
-  --image agoncal/book-fallback:1.0.0-SNAPSHOT \
+  --image agoncal/book-fallback:plainsasl \
   --name book-fallback-container-app \
   --resource-group $RESOURCE_GROUP \
   --environment $CONTAINERAPPS_ENVIRONMENT
@@ -653,7 +659,7 @@ If you want to change the revision to a new Docker image, update the container (
 az containerapp update \
   --name book-container-app \
   --resource-group $RESOURCE_GROUP \
-  --image agoncal/book:azure
+  --image agoncal/book:9093
 ```
 
 ### Check the microservices in the Container App
