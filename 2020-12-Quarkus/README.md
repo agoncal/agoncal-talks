@@ -428,18 +428,32 @@ az provider register --namespace Microsoft.Web
 ```shell
 RESOURCE_GROUP="rg-bookstore"
 LOCATION="eastus2"
+# Container Apps
 LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
 CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
-POSTGRESDB_NAME="bookstore-db"
-MONGODB_NAME="failure-db"
+# Kafka
 EVENTHUB_NAMESPACE="bookstore-event"
-EVENTHUB_NAME="failed-books-topic"
+EVENTHUB_TOPIC="failed-books-topic"
+# Number
+NUMBER_APP="number-app"
+# Book
+BOOK_APP="book-app"
+BOOK_DB="bookstore-db"
+BOOK_DB_SCHEMA="book"
+BOOK_DB_USER="userbookstore"
+BOOK_DB_PWD="p#ssw0rd-12046"
+# Book Fallback
+FAILURE_APP="failure-app"
+FAILURE_DB="failure-db"
+FAILURE_DB_SCHEMA="failures"
 ```
 
 * Create a resource group 
 
 ```shell
-az group create --name $RESOURCE_GROUP --location $LOCATION
+az group create \
+  --name $RESOURCE_GROUP \
+  --location $LOCATION
 ```
 
 ### Create a Container Apps environment
@@ -466,11 +480,11 @@ echo $LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET
 
 ````shell
 az containerapp env create \
-  --name $CONTAINERAPPS_ENVIRONMENT \
   --resource-group $RESOURCE_GROUP \
+  --location $LOCATION \
+  --name $CONTAINERAPPS_ENVIRONMENT \
   --logs-workspace-id $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-  --logs-workspace-key $LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET \
-  --location $LOCATION
+  --logs-workspace-key $LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET
 ````
 
 ### Create the managed Postgres Database
@@ -488,9 +502,9 @@ Then, create a database in the region where it's available:
 az postgres server create \
   --resource-group $RESOURCE_GROUP \
   --location $LOCATION \
-  --name $POSTGRESDB_NAME \
-  --admin-user userbookstore \
-  --admin-password p#ssw0rd-12046 \
+  --name $BOOK_DB \
+  --admin-user $BOOK_DB_USER \
+  --admin-password $BOOK_DB_PWD \
   --sku-name B_Gen5_1 \
   --storage-size 5120 \
   --version 11
@@ -501,8 +515,8 @@ Create the Book database:
 ```shell
 az postgres db create \
     --resource-group $RESOURCE_GROUP \
-    --name book \
-    --server-name $POSTGRESDB_NAME
+    --name $BOOK_DB_SCHEMA \
+    --server-name $BOOK_DB
 ```
 
 If you want to access the Postgres database from your local machine, you need to give access to your local IP address.
@@ -511,8 +525,8 @@ A convenient way to know the local IP address is to go to http://whatismyip.akam
 ```shell
 az postgres server firewall-rule create \
     --resource-group $RESOURCE_GROUP \
-    --name $POSTGRESDB_NAME-allow-local-ip \
-    --server $POSTGRESDB_NAME \
+    --name $BOOK_DB-allow-local-ip \
+    --server $BOOK_DB \
     --start-ip-address <LOCAL_IP_ADDRESS> \
     --end-ip-address <LOCAL_IP_ADDRESS>
 ```
@@ -522,7 +536,7 @@ You can check the firewall rules with:
 ````shell
 az postgres server firewall-rule list  \
     --resource-group $RESOURCE_GROUP \
-    --server-name $POSTGRESDB_NAME \
+    --server-name $BOOK_DB \
     --out table
 ````
 
@@ -530,9 +544,9 @@ Get the connection string with the following command so you can connect to it:
 
 ```shell
 az postgres server show-connection-string \
-  --database-name $POSTGRESDB_NAME \
-  --admin-user userbookstore \
-  --admin-password p#ssw0rd-12046
+  --database-name $BOOK_DB \
+  --admin-user $BOOK_DB_USER \
+  --admin-password $BOOK_DB_PWD
 ```
 
 Add this connection string to the `application.properties` file, with the `prod` profile:
@@ -552,7 +566,7 @@ Create a database in the region where it's available:
 az cosmosdb create \
   --resource-group $RESOURCE_GROUP \
   --locations regionName="$LOCATION" failoverPriority=0 \
-  --name $MONGODB_NAME \
+  --name $FAILURE_DB \
   --kind MongoDB
 ```
 
@@ -560,17 +574,17 @@ Create the Failure collection:
 
 ````shell
 az cosmosdb mongodb database create \
-  --account-name $MONGODB_NAME \
-  --name failures \
-  --resource-group $RESOURCE_GROUP
+  --resource-group $RESOURCE_GROUP \
+  --account-name $FAILURE_DB \
+  --name $FAILURE_DB_SCHEMA
 ````
 
 To get the connection string, execute the following command:
 
 ````shell
 az cosmosdb list-connection-strings \
-  --name $MONGODB_NAME \
-  --resource-group $RESOURCE_GROUP
+  --resource-group $RESOURCE_GROUP \
+  --name $FAILURE_DB
 ````
 
 Take the _Primary MongoDB Connection String_ and add it to the Book Fallback `application.properties` file with the `prod` profile:
@@ -586,16 +600,16 @@ We need to create an Azure event hub for that.
 
 ```shell
 az eventhubs namespace create \
-  --name $EVENTHUB_NAMESPACE \
   --resource-group $RESOURCE_GROUP \
-  --location $LOCATION
+  --location $LOCATION \
+  --name $EVENTHUB_NAMESPACE
 ```
 
 ```shell
 az eventhubs eventhub create \
+  --resource-group $RESOURCE_GROUP \
   --name $EVENTHUB_NAME \
-  --namespace-name $EVENTHUB_NAMESPACE \
-  --resource-group $RESOURCE_GROUP
+  --namespace-name $EVENTHUB_NAMESPACE
 ```
 
 Get the connection string of the event hub namespace
@@ -612,30 +626,30 @@ az eventhubs namespace authorization-rule keys list \
 
 ```shell
 az containerapp create \
-  --image agoncal/number:1.0.0-SNAPSHOT \
-  --name number-container-app \
   --resource-group $RESOURCE_GROUP \
+  --image agoncal/number:1.0.0-SNAPSHOT \
+  --name $NUMBER_APP \
   --environment $CONTAINERAPPS_ENVIRONMENT \
   --ingress external \
   --target-port 8701 \
   --query configuration.ingress.fqdn
 ```
 
-This command returns the fully qualified name of the endpoint (eg. `number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io`).
-That means you can now access the microservice with `curl https://number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers`
+This command returns the fully qualified name of the endpoint (eg. `number-app.redsky-874c6570.eastus2.azurecontainerapps.io`).
+That means you can now access the microservice with `curl https://number-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers`
 Take this fully qualified name and add it to the `application.properties` of Book:
 
 ```shell
-%prod.org.agoncal.talk.quarkus.book.NumberProxy/mp-rest/url=https://number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io
+%prod.org.agoncal.talk.quarkus.book.NumberProxy/mp-rest/url=https://number-app.redsky-874c6570.eastus2.azurecontainerapps.io
 ```
 
 Deploy the Book microservice:
 
 ```shell
 az containerapp create \
-  --image agoncal/book:1.0.0-SNAPSHOT \
-  --name book-container-app \
   --resource-group $RESOURCE_GROUP \
+  --image agoncal/book:1.0.0-SNAPSHOT \
+  --name $BOOK_APP \
   --environment $CONTAINERAPPS_ENVIRONMENT \
   --ingress external \
   --target-port 8702 \
@@ -647,17 +661,17 @@ To be able to access the database, we need to configure the firewall and allow t
 ```shell
 az postgres server firewall-rule create \
     --resource-group $RESOURCE_GROUP \
-    --name $POSTGRESDB_NAME-allow-book-ip \
-    --server $POSTGRESDB_NAME \
+    --name $BOOK_DB-allow-book-ip \
+    --server $BOOK_DB \
     --start-ip-address 52.167.13.244 \
     --end-ip-address 52.167.13.244
 ```
 
 ```shell
 az containerapp create \
-  --image agoncal/book-fallback:1.0.0-SNAPSHOT \
-  --name book-fallback-container-app \
   --resource-group $RESOURCE_GROUP \
+  --image agoncal/book-fallback:1.0.0-SNAPSHOT \
+  --name $FAILURE_APP \
   --environment $CONTAINERAPPS_ENVIRONMENT \
   --ingress external \
   --target-port 8703 \
@@ -666,13 +680,13 @@ az containerapp create \
 
 ### Access the application
 
-In the overview you find the URL https://number-container-app.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io but it's not this one.
+In the overview you find the URL https://number-app.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io but it's not this one.
 You need to check the _Revision Management_ and get the _Application Url_:
 
 ```shell
-curl https://number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers -v
-curl https://book-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
-curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
+curl https://number-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers -v
+curl https://book-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
+curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
 ```
 
 Now let's stop the Number microservice to see if the fallback works.
@@ -680,18 +694,18 @@ First, get the name of the revision:
 
 ````shell
 az containerapp revision list \
---name number-container-app \
---resource-group $RESOURCE_GROUP \
---out table
+  --resource-group $RESOURCE_GROUP \
+  --name $NUMBER_APP \
+  --out table
 ````
 
 Stop the revision:
 
 ```shell
 az containerapp revision deactivate \
-  --name number-container-app--38l9bat  \
-  --app number-container-app \
-  --resource-group $RESOURCE_GROUP
+  --resource-group $RESOURCE_GROUP \
+  --name number-app--38l9bat  \
+  --app $NUMBER_APP
 ```
 
 ### Redeploy a microservice
@@ -700,32 +714,32 @@ If you need to restart the container, first check the name of the revision:
 
 ```shell
 az containerapp revision list \
---name book-container-app \
---resource-group $RESOURCE_GROUP \
---out table
+  --resource-group $RESOURCE_GROUP \
+  --name $BOOK_APP \
+  --out table
 ```
 
 ```shell
 az containerapp revision restart \
-  --name book-container-app--bl3tzvc \
-  --app book-container-app \
-  --resource-group $RESOURCE_GROUP
+  --resource-group $RESOURCE_GROUP \
+  --name book-app--bl3tzvc \
+  --app $BOOK_APP
 ```
 
 If you want to change the revision to a new Docker image, update the container (in this case using a different tag `azure`):
 
 ```shell
 az containerapp update \
-  --name book-container-app \
   --resource-group $RESOURCE_GROUP \
-  --image agoncal/book:9093
+  --name $BOOK_APP \
+  --image agoncal/book:azure
 ```
 
 ### Check the microservices in the Container App
 
 ```shell
 az containerapp list --resource-group $RESOURCE_GROUP --output table 
-az containerapp show --resource-group $RESOURCE_GROUP --output table --name number-container-app 
+az containerapp show --resource-group $RESOURCE_GROUP --output table --name $NUMBER_APP 
 ```
 
 ### Checking Logs
@@ -735,21 +749,21 @@ To access the logs of each microservice, you can write the following queries:
 ````shell
 az monitor log-analytics query \
 --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
---analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'number-container-app' | project ContainerAppName_s, Log_s, TimeGenerated " \
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'number-app' | project ContainerAppName_s, Log_s, TimeGenerated " \
 --out table
 ````
 
 ````shell
 az monitor log-analytics query \
 --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
---analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'book-container-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'book-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
 --out table
 ````
 
 ````shell
 az monitor log-analytics query \
 --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
---analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'book-fallback-container-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'failure-app' | project ContainerAppName_s, Log_s, TimeGenerated | take 30" \
 --out table
 ````
 ### Troubleshooting
