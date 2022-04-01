@@ -655,10 +655,13 @@ az postgres server firewall-rule create \
 
 ```shell
 az containerapp create \
-  --image agoncal/book-fallback:plainsasl \
+  --image agoncal/book-fallback:1.0.0-SNAPSHOT \
   --name book-fallback-container-app \
   --resource-group $RESOURCE_GROUP \
-  --environment $CONTAINERAPPS_ENVIRONMENT
+  --environment $CONTAINERAPPS_ENVIRONMENT \
+  --ingress external \
+  --target-port 8703 \
+  --query configuration.ingress.fqdn
 ```
 
 ### Access the application
@@ -670,6 +673,25 @@ You need to check the _Revision Management_ and get the _Application Url_:
 curl https://number-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers -v
 curl https://book-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
 curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-container-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
+```
+
+Now let's stop the Number microservice to see if the fallback works.
+First, get the name of the revision:
+
+````shell
+az containerapp revision list \
+--name number-container-app \
+--resource-group $RESOURCE_GROUP \
+--out table
+````
+
+Stop the revision:
+
+```shell
+az containerapp revision deactivate \
+  --name number-container-app--38l9bat  \
+  --app number-container-app \
+  --resource-group $RESOURCE_GROUP
 ```
 
 ### Redeploy a microservice
