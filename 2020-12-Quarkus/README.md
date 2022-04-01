@@ -430,7 +430,8 @@ RESOURCE_GROUP="rg-bookstore"
 LOCATION="eastus2"
 LOG_ANALYTICS_WORKSPACE="bookstore-apps-logs"
 CONTAINERAPPS_ENVIRONMENT="bookstore-apps-env"
-DATABASE_NAME="bookstore-db"
+POSTGRESDB_NAME="bookstore-db"
+MONGODB_NAME="failure-db"
 EVENTHUB_NAMESPACE="bookstore-event"
 EVENTHUB_NAME="failed-books-topic"
 ```
@@ -487,7 +488,7 @@ Then, create a database in the region where it's available:
 az postgres server create \
   --resource-group $RESOURCE_GROUP \
   --location $LOCATION \
-  --name $DATABASE_NAME \
+  --name $POSTGRESDB_NAME \
   --admin-user userbookstore \
   --admin-password p#ssw0rd-12046 \
   --sku-name B_Gen5_1 \
@@ -501,7 +502,7 @@ Create the Book database:
 az postgres db create \
     --resource-group $RESOURCE_GROUP \
     --name book \
-    --server-name $DATABASE_NAME
+    --server-name $POSTGRESDB_NAME
 ```
 
 If you want to access the Postgres database from your local machine, you need to give access to your local IP address.
@@ -510,8 +511,8 @@ A convenient way to know the local IP address is to go to http://whatismyip.akam
 ```shell
 az postgres server firewall-rule create \
     --resource-group $RESOURCE_GROUP \
-    --name $DATABASE_NAME-allow-local-ip \
-    --server $DATABASE_NAME \
+    --name $POSTGRESDB_NAME-allow-local-ip \
+    --server $POSTGRESDB_NAME \
     --start-ip-address <LOCAL_IP_ADDRESS> \
     --end-ip-address <LOCAL_IP_ADDRESS>
 ```
@@ -521,7 +522,7 @@ You can check the firewall rules with:
 ````shell
 az postgres server firewall-rule list  \
     --resource-group $RESOURCE_GROUP \
-    --server-name $DATABASE_NAME \
+    --server-name $POSTGRESDB_NAME \
     --out table
 ````
 
@@ -529,7 +530,7 @@ Get the connection string with the following command so you can connect to it:
 
 ```shell
 az postgres server show-connection-string \
-  --database-name $DATABASE_NAME \
+  --database-name $POSTGRESDB_NAME \
   --admin-user userbookstore \
   --admin-password p#ssw0rd-12046
 ```
@@ -540,6 +541,42 @@ Add this connection string to the `application.properties` file, with the `prod`
 %prod.quarkus.datasource.username=userbookstore@bookstore-db-antoniomanug.postgres.database.azure.com
 %prod.quarkus.datasource.password=p#ssw0rd-12046
 %prod.quarkus.datasource.jdbc.url=jdbc:postgresql://bookstore-db-antoniomanug.postgres.database.azure.com:5432/book?ssl=true&sslmode=require
+```
+
+### Create the managed MongoDB Database
+
+We need to create a MongoDB so the Book Fallback microservice can store failures.
+Create a database in the region where it's available:
+
+```shell
+az cosmosdb create \
+  --resource-group $RESOURCE_GROUP \
+  --locations regionName="$LOCATION" failoverPriority=0 \
+  --name $MONGODB_NAME \
+  --kind MongoDB
+```
+
+Create the Failure collection:
+
+````shell
+az cosmosdb mongodb database create \
+  --account-name $MONGODB_NAME \
+  --name failures \
+  --resource-group $RESOURCE_GROUP
+````
+
+To get the connection string, execute the following command:
+
+````shell
+az cosmosdb list-connection-strings \
+  --name $MONGODB_NAME \
+  --resource-group $RESOURCE_GROUP
+````
+
+Take the _Primary MongoDB Connection String_ and add it to the Book Fallback `application.properties` file with the `prod` profile:
+
+```shell
+%prod.quarkus.mongodb.connection-string=mongodb://failure-db:lYOwEResTGLsSR3jyBdi0OMWJtgWePdPvIBB9z99h0n9fxcijuhOUyd8HqeL9Myj2cbDffxmONnW2wUF2yWtIA==@failure-db.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@failure-db@
 ```
 
 ### Create the Managed Event Hub
@@ -610,8 +647,8 @@ To be able to access the database, we need to configure the firewall and allow t
 ```shell
 az postgres server firewall-rule create \
     --resource-group $RESOURCE_GROUP \
-    --name $DATABASE_NAME-allow-book-ip \
-    --server $DATABASE_NAME \
+    --name $POSTGRESDB_NAME-allow-book-ip \
+    --server $POSTGRESDB_NAME \
     --start-ip-address 52.167.13.244 \
     --end-ip-address 52.167.13.244
 ```
