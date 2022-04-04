@@ -362,6 +362,7 @@ public List<Book> listAllQuarkusBooks() {
 * `curl http://localhost:8701/api/numbers`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * `curl http://localhost:8702/api/books | jq`
+* `curl http://localhost:8703/api/failures | jq`
 
 ## Deploying to Azure Container Apps
 
@@ -476,7 +477,7 @@ LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET=`az monitor log-analytics workspace get-sh
 echo $LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET
 ```
 
-* Create the environment:
+* Create the container apps environment:
 
 ````shell
 az containerapp env create \
@@ -503,6 +504,7 @@ az postgres server create \
   --resource-group $RESOURCE_GROUP \
   --location $LOCATION \
   --name $BOOK_DB \
+  --public all \
   --admin-user $BOOK_DB_USER \
   --admin-password $BOOK_DB_PWD \
   --sku-name B_Gen5_1 \
@@ -546,7 +548,8 @@ Get the connection string with the following command so you can connect to it:
 az postgres server show-connection-string \
   --database-name $BOOK_DB \
   --admin-user $BOOK_DB_USER \
-  --admin-password $BOOK_DB_PWD
+  --admin-password $BOOK_DB_PWD \
+  --query connectionStrings.jdbc
 ```
 
 Add this connection string to the `application.properties` file, with the `prod` profile:
@@ -582,9 +585,11 @@ az cosmosdb mongodb database create \
 To get the connection string, execute the following command:
 
 ````shell
-az cosmosdb list-connection-strings \
+az cosmosdb keys list \
   --resource-group $RESOURCE_GROUP \
-  --name $FAILURE_DB
+  --name $FAILURE_DB \
+  --type connection-strings \
+  --query "connectionStrings[?description=='Primary MongoDB Connection String'].connectionString"
 ````
 
 Take the _Primary MongoDB Connection String_ and add it to the Book Fallback `application.properties` file with the `prod` profile:
@@ -608,11 +613,11 @@ az eventhubs namespace create \
 ```shell
 az eventhubs eventhub create \
   --resource-group $RESOURCE_GROUP \
-  --name $EVENTHUB_NAME \
+  --name $EVENTHUB_TOPIC \
   --namespace-name $EVENTHUB_NAMESPACE
 ```
 
-Get the connection string of the event hub namespace
+Get the connection string of the event hub namespace.
 
 ```shell
 az eventhubs namespace authorization-rule keys list \
@@ -622,7 +627,21 @@ az eventhubs namespace authorization-rule keys list \
   --query primaryConnectionString
 ```
 
-### Deploy the microservices
+Add this connection string to the Book and Failure microservice `application.properties` files with the `prod` profile:
+
+```shell
+%prod.kafka.bootstrap.servers=bookstore-event.servicebus.windows.net:9093
+%prod.kafka.security.protocol=SASL_SSL
+%prod.kafka.sasl.mechanism=PLAIN
+%prod.kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+	username="$ConnectionString" \
+	password="Endpoint=sb://bookstore-event.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=OtG0SZdh8DexxxxSohW+mV7oVbovjtMfFbA3fc=";
+```
+
+### Build, Push and Deploy the microservices
+
+Nearly all the `prod` properties have been set, but there are still a few to add.
+Start by building the Number microservices with:
 
 ```shell
 az containerapp create \
@@ -635,12 +654,26 @@ az containerapp create \
   --query configuration.ingress.fqdn
 ```
 
-This command returns the fully qualified name of the endpoint (eg. `number-app.redsky-874c6570.eastus2.azurecontainerapps.io`).
-That means you can now access the microservice with `curl https://number-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers`
+This command returns the fully qualified name of the endpoint (eg. `number-app.icysky-c425dedf.eastus2.azurecontainerapps.io`).
+That means you can now access the microservice with `curl https://number-app.icysky-c425dedf.eastus2.azurecontainerapps.io/api/numbers`
 Take this fully qualified name and add it to the `application.properties` of Book:
 
 ```shell
 %prod.org.agoncal.talk.quarkus.book.NumberProxy/mp-rest/url=https://number-app.redsky-874c6570.eastus2.azurecontainerapps.io
+```
+
+Now you can build both the Book and the Failure microservices:
+
+```shell
+book$ mvn clean package -Dmaven.test.skip=true -Dquarkus.container-image.build=true
+book-fallback$ mvn clean package -Dmaven.test.skip=true -Dquarkus.container-image.build=true
+```
+
+Then, push the Docker images with:
+
+```shell
+$ docker push agoncal/book-fallback:1.0.0-SNAPSHOT
+$ docker push agoncal/book:1.0.0-SNAPSHOT
 ```
 
 Deploy the Book microservice:
@@ -656,17 +689,6 @@ az containerapp create \
   --query configuration.ingress.fqdn
 ```
 
-To be able to access the database, we need to configure the firewall and allow the IP address of the Book microservice:
-
-```shell
-az postgres server firewall-rule create \
-    --resource-group $RESOURCE_GROUP \
-    --name $BOOK_DB-allow-book-ip \
-    --server $BOOK_DB \
-    --start-ip-address 52.167.13.244 \
-    --end-ip-address 52.167.13.244
-```
-
 ```shell
 az containerapp create \
   --resource-group $RESOURCE_GROUP \
@@ -680,13 +702,13 @@ az containerapp create \
 
 ### Access the application
 
-In the overview you find the URL https://number-app.yellowsmoke-42d76bca.westeurope.azurecontainerapps.io but it's not this one.
-You need to check the _Revision Management_ and get the _Application Url_:
+With the URLs that you got from the output, these are the curl commands you can execute:
 
 ```shell
-curl https://number-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/numbers -v
-curl https://book-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
-curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-app.redsky-874c6570.eastus2.azurecontainerapps.io/api/books -v | jq
+curl https://number-app.icysky-c425dedf.eastus2.azurecontainerapps.io/api/numbers -v
+curl https://book-app.icysky-c425dedf.eastus2.azurecontainerapps.io/api/books -v | jq
+curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-app.icysky-c425dedf.eastus2.azurecontainerapps.io/api/books -v | jq
+curl https://failure-app.icysky-c425dedf.eastus2.azurecontainerapps.io/api/failures -v | jq
 ```
 
 Now let's stop the Number microservice to see if the fallback works.
@@ -704,8 +726,15 @@ Stop the revision:
 ```shell
 az containerapp revision deactivate \
   --resource-group $RESOURCE_GROUP \
-  --name number-app--38l9bat  \
+  --name number-app--f2yca2h  \
   --app $NUMBER_APP
+```
+
+Create a book and check that there is a failure:
+
+```shell
+curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" https://book-app.icysky-c425dedf.eastus2.azurecontainerapps.io/api/books -v | jq
+curl https://failure-app.icysky-c425dedf.eastus2.azurecontainerapps.io/api/failures -v | jq
 ```
 
 ### Redeploy a microservice
