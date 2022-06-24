@@ -44,7 +44,7 @@
         <version.arquillian.wildfly.remote>8.2.1.Final</version.arquillian.wildfly.remote>
         <version.arquillian.wildfly.managed>8.2.1.Final</version.arquillian.wildfly.managed>
         <version.junit>4.12</version.junit>
-        <version.resteasy>3.0.19.Final</version.resteasy>
+        <version.resteasy>3.14.0.Final</version.resteasy>
         <version.json>1.0.4</version.json>
         <version.assertj>3.5.2</version.assertj>
 
