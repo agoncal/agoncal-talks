@@ -1,2 +1,25 @@
 maven-wrapper.jar
 /temp
+## Mac
+.DS_Store
+
+## Ruby
+*.lock
+
+## Asciidoctor
+slides/*.html
+
+## Java
+rebel.xml
+.classpath
+.project
+.settings/
+target/
+logs/
+.idea/
+*/.idea/
+*.iml
+*.svg
+*.svg.cache
+*.versionsBackup
+*dummy*
