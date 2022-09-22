@@ -13,9 +13,9 @@
 
 ### Code
 
-* In `$CODE_HOME/temp` remove everything `rm -rf *` and `mkdir microservices`
-* Copy the structure with `cp -R $CODE_HOME/Agoncal/agoncal-talks/2020-12-Quarkus/ microservices`
-* Copy .gitignore `cp $CODE_HOME/Agoncal/agoncal-talks/.gitignore microservices`
+* In `$CODE/temp` remove everything `rm -rf *` and `mkdir microservices`
+* Copy the structure with `cp -R $CODE/Agoncal/agoncal-talks/2020-12-Quarkus/ microservices`
+* Copy .gitignore `cp $CODE/Agoncal/agoncal-talks/.gitignore microservices`
 * `cd microservices`  
 * Clean with `mvn clean` and then remove `rm -rf .idea/ book/ book-fallback/ number/ microservices.iml`
 * Remove the `<modules>` in `pom.xml`
@@ -40,7 +40,7 @@
 
 * Switch to `Presentation` profile
 * Split the terminal into 4 
-* `cd $CODE_HOME/Temp/microservices` in each tab
+* `cd $CODE/Temp/microservices` in each tab
 
 ## Demo 01 - Book
 
@@ -174,6 +174,7 @@ $ git commit -am "number"
 * Copy `NumberResource` and rename it to `NumberProxy`
 * Change `NumberProxy` to an interface, empty the `generateISBN` method
 * Add `@RegisterRestClient` to the interface
+* Make sure the interface is `public`
 
 ### Use the Proxy
 
@@ -184,7 +185,7 @@ $ git commit -am "number"
 
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books -v`
 * Exception, look for `Unable to determine the proper baseUrl/baseUri`
-* Add `org.agoncal.talk.quarkus.book.NumberProxy/mp-rest/url=http://localhost:8701`
+* Add `quarkus.rest-client."org.agoncal.talk.quarkus.book.NumberProxy".url=http://localhost:8701`
 
 ### Mock the proxy
 
@@ -235,7 +236,7 @@ $ git commit -am "fallback"
 
 * Stop the Book microservice
 * In Book add Kafka extension `mvn quarkus:add-extension -Dextensions="smallrye-reactive-messaging-kafka"`
-* Add the channel `@Inject @Channel("failed-books") Emitter<String> failedBook;`
+* In `BookResource` add the channel `@Inject @Channel("failed-books") Emitter<String> failedBook;`
 * In `fallbackOnCreateAQuarkusBook` add `failedBook.send(book.toString());`
 
 ### Configure the channel
@@ -295,7 +296,6 @@ $ git commit -am "kafka"
 * Add `@Entity` to Book and `extends PanacheEntity`
 * In `BookResource.createAQuarkusBook` add `book.persist();`
 * Add `@Transactional` to the `createAQuarkusBook` method
-* `quarkus.hibernate-orm.database.generation=drop-and-create` 
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 
 ### List Books
@@ -313,13 +313,22 @@ public List<Book> listAllQuarkusBooks() {
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * `curl http://localhost:8702/api/books | jq`
 
+### Git
+
+```
+$ git add .
+$ git commit -am "entity"
+```
+
 ## Demo 07 - Augmentation
 
-* Set the property `-Dquarkus.package.fernflower.enabled=true`
+* In Book
+* Set the property `quarkus.package.fernflower.enabled=true`
 * Package Book with `mvn clean package -Dmaven.test.skip=true`
 * Show byte code in `target/decompiled`
 * Show `generated-bytecode/META-INF/quarkus-generated-openapi-doc.JSON`
-* Show `transformed-bytecode/org/agoncal/talk/quarkus/book/Book.java`
+* Show all the generated methods in `transformed-bytecode/org/agoncal/talk/quarkus/book/Book.java`
+* Show the setters in `transformed-bytecode/org/agoncal/talk/quarkus/book/BookResource.java`
 
 ## Demo 08 - Packaging
 
@@ -335,9 +344,15 @@ public List<Book> listAllQuarkusBooks() {
 
 ### Native Executable
 
+Make sure GraalVMN and JDK are align
+* `sdk use java 22.2.r17-grl`
+* `ls -al ~/.sdkman/candidates/java/`
+* `GRAALVM_HOME=~/.sdkman/candidates/java/22.2.r17-grl`
+* `JAVA_HOME=${GRAALVM_HOME}`
+
 * `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native`
 * `ll target` show size of the executable
-* `./target/number-1.0-SNAPSHOT-runner`
+* `./target/number-1.0.0-SNAPSHOT-runner`
 * `curl http://localhost:8701/api/numbers`
 
 ### Native Linux Executable and Docker
@@ -348,7 +363,7 @@ public List<Book> listAllQuarkusBooks() {
 * Show the `Dockerfile.native` file
 * `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true`  
 * `ll target` show size of the executable
-* `./target/number-1.0-SNAPSHOT-runner`
+* `./target/number-1.0.0-SNAPSHOT-runner`
 * could not be run by the operating system
 * `docker image ls | grep agoncal`
 * Execute `docker container run -i --rm -p 8701:8701 agoncal/number:1.0.0-SNAPSHOT`
