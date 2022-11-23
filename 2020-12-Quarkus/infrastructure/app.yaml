@@ -1,4 +1,8 @@
 services:
+    rest-number:
+        image: "agoncal/number:1.0.0-SNAPSHOT"
+        ports:
+            - "8701:8701"
     rest-book:
         image: "agoncal/book:1.0.0-SNAPSHOT"
         ports:
@@ -9,20 +13,12 @@ services:
             postgres:
                 condition: service_healthy
         environment:
-            QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/books_database
-            QUARKUS_DATASOURCE_USERNAME: book
-            QUARKUS_DATASOURCE_PASSWORD: book
-            QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: drop-and-create
+            QUARKUS_DATASOURCE_JDBC_URL: "jdbc:postgresql://postgres:5432/books_database"
+            QUARKUS_DATASOURCE_USERNAME: "postgres"
+            QUARKUS_DATASOURCE_PASSWORD: "postgres"
+            QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "drop-and-create"
             ORG_AGONCAL_TALK_QUARKUS_BOOK_NUMBERPROXY_MP_REST_URL: http://rest-number:8701
             KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-        networks:
-            - bookstore-network
-    rest-number:
-        image: "agoncal/number:1.0.0-SNAPSHOT"
-        ports:
-            - "8701:8701"
-        networks:
-            - bookstore-network
     book-fallback:
         image: "agoncal/book-fallback:1.0.0-SNAPSHOT"
         ports:
@@ -32,18 +28,14 @@ services:
                 condition: service_healthy
         environment:
             KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-        networks:
-            - bookstore-network
     postgres:
-        image: "postgres:13.4"
+        image: "postgres:14.6"
         ports:
             - "5432:5432"
         environment:
-            POSTGRES_DB: books_database
-            POSTGRES_USER: book
-            POSTGRES_PASSWORD: book
-        networks:
-            - bookstore-network
+            POSTGRES_DB: "books_database"
+            POSTGRES_USER: "postgres"
+            POSTGRES_PASSWORD: "postgres"
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U postgres"]
             interval: 5s
@@ -59,8 +51,6 @@ services:
             - "2181:2181"
         environment:
             LOG_DIR: /tmp/logs
-        networks:
-            - bookstore-network
     kafka:
         image: strimzi/kafka:0.20.1-kafka-2.6.0
         command: [
@@ -76,8 +66,6 @@ services:
             KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
             KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-        networks:
-            - bookstore-network
         healthcheck:
             test: nc -z localhost 9092 || exit -1
             start_period: 15s

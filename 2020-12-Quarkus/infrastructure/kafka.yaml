@@ -9,7 +9,6 @@ services:
             - "2181:2181"
         environment:
             LOG_DIR: /tmp/logs
-
     kafka:
         image: strimzi/kafka:0.20.1-kafka-2.6.0
         command: [

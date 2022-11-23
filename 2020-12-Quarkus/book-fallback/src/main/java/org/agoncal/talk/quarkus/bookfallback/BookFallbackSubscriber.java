@@ -3,22 +3,17 @@ package org.agoncal.talk.quarkus.bookfallback;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+@ApplicationScoped
 public class BookFallbackSubscriber {
 
     @Inject
     Logger logger;
 
-    @Inject
-    FailureResource failureResource;
-
     @Incoming("failed-books")
     public void bookToBeCreatedLater(String book) {
         logger.info("### Book to be created later " + book);
-        Failure failure = new Failure();
-        failure.message = "Book to be created later";
-        failure.payload = book;
-        failureResource.createAQuarkusFailure(failure);
     }
 }

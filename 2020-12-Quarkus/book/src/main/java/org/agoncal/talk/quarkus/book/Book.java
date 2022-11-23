@@ -20,6 +20,7 @@ public class Book extends PanacheEntity {
             ", topic='" + topic + '\'' +
             ", isbn='" + isbn + '\'' +
             ", createdAt=" + createdAt +
+            ", id=" + id +
             '}';
     }
 }

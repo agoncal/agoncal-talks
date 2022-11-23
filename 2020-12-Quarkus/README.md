@@ -52,6 +52,12 @@
 * `mvn quarkus:dev`  
 * `curl http://localhost:8702/api/books`
 
+### Show continuous testing
+
+* Change the `BookResource` to return a different value
+* Execute continuous testing `mvn quarkus:dev`
+* Fix the test
+
 ### Change BookResource
 
 * In `BookResource` rename the `hello` method in `Book createAQuarkusBook(String title)`
@@ -189,9 +195,9 @@ $ git commit -am "number"
 
 ### Mock the proxy
 
-* In Book `mvn test` pass
+* In Book run the continuous tests (or `mvn test`), show they pass
 * Kill Number
-* `mvn test` fails
+* Run the continuous tests, show they fail
 * In `src/test` generate new class `MockNumberProxy`
 * Implements `NumberProxy` and implement the method `generateISBN`
 * `return "mock isbn";`
@@ -296,6 +302,7 @@ $ git commit -am "kafka"
 * Add `@Entity` to Book and `extends PanacheEntity`
 * In `BookResource.createAQuarkusBook` add `book.persist();`
 * Add `@Transactional` to the `createAQuarkusBook` method
+* In the Book.toString() method add the id that is inherited `", id=" + id +`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 
 ### List Books
@@ -341,6 +348,7 @@ $ git commit -am "entity"
 * Execute the runner `java -jar target/quarkus-app/quarkus-run.jar`
 * Uber Jar `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar`
 * `ll target` show size of the jar no more `lib`
+* Execute the runner `java -jar target/number-1.0.0-SNAPSHOT-runner.jar`
 
 ### Native Executable
 
@@ -374,6 +382,7 @@ Make sure GraalVMN and JDK are align
 * `docker image ls | grep agoncal`
 * Show `infrastructure/app.yaml`
 * Run `docker-compose -f infrastructure/app.yaml up`
+* Show Docker Desktop
 * `curl http://localhost:8701/api/numbers`
 * `curl -X POST -H "Content-Type: text/plain" -d "Understanding Quarkus" http://localhost:8702/api/books`
 * `curl http://localhost:8702/api/books | jq`

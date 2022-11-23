@@ -1,9 +1,9 @@
 services:
     postgres:
-        image: "postgres:13.4"
+        image: "postgres:14.6"
         ports:
             - "5432:5432"
         environment:
-            POSTGRES_DB: books_database
-            POSTGRES_USER: book
-            POSTGRES_PASSWORD: book
+            POSTGRES_DB: "books_database"
+            POSTGRES_USER: "postgres"
+            POSTGRES_PASSWORD: "postgres"
