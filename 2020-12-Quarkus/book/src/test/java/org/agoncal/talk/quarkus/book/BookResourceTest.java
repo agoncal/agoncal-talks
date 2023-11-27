@@ -8,7 +8,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasKey;
 
 @QuarkusTest
-public class BookResourceTest {
+class BookResourceTest {
 
     @Test
     public void shouldCreateAQuarkusBook() {

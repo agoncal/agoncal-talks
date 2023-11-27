@@ -1,10 +1,14 @@
 package org.agoncal.talk.quarkus.bookfallback;
 
-import org.eclipse.microprofile.reactive.messaging.Incoming;
+import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.reactive.messaging.*;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class BookFallbackSubscriber {

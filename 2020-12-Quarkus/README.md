@@ -330,7 +330,7 @@ $ git commit -am "entity"
 ## Demo 07 - Augmentation
 
 * In Book
-* Set the property `quarkus.package.fernflower.enabled=true`
+* Set the property `quarkus.package.vineflower.enabled=true`
 * Package Book with `mvn clean package -Dmaven.test.skip=true`
 * Show byte code in `target/decompiled`
 * Show `generated-bytecode/META-INF/quarkus-generated-openapi-doc.JSON`
@@ -353,10 +353,9 @@ $ git commit -am "entity"
 ### Native Executable
 
 Make sure GraalVMN and JDK are align
-* `sdk use java 22.2.r17-grl`
+* `sdk use java 17.0.9-graal`
 * `ls -al ~/.sdkman/candidates/java/`
-* `GRAALVM_HOME=~/.sdkman/candidates/java/22.2.r17-grl`
-* `JAVA_HOME=${GRAALVM_HOME}`
+* `GRAALVM_HOME=~/.sdkman/candidates/java/17.0.9-graal`
 
 * `mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=native`
 * `ll target` show size of the executable

@@ -8,7 +8,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.startsWith;
 
 @QuarkusTest
-public class NumberResourceTest {
+class NumberResourceTest {
 
     @Test
     public void testHelloEndpoint() {
